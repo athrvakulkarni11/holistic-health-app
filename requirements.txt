@@ -1,8 +1,9 @@
 fastapi
 uvicorn
-pymupdf
-pdf2image
+pymupdf>=1.18.0
+pillow
 python-multipart
 groq
 python-dotenv
-python-multipart
+inference_sdk
+tensorflow

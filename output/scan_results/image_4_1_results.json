@@ -1,0 +1,77 @@
+{
+    "xray": {
+        "predictions": [
+            {
+                "prediction": "4- collarbone left",
+                "confidence": 0.9718226790428162,
+                "bbox": {
+                    "x": 215.5,
+                    "y": 89.5,
+                    "width": 243.0,
+                    "height": 83.0
+                }
+            },
+            {
+                "prediction": "5- collarbone right",
+                "confidence": 0.9514889717102051,
+                "bbox": {
+                    "x": 479.0,
+                    "y": 93.0,
+                    "width": 238.0,
+                    "height": 80.0
+                }
+            },
+            {
+                "prediction": "1- left lung",
+                "confidence": 0.9500428438186646,
+                "bbox": {
+                    "x": 235.0,
+                    "y": 284.5,
+                    "width": 212.0,
+                    "height": 485.0
+                }
+            },
+            {
+                "prediction": "0- lungs",
+                "confidence": 0.9388187527656555,
+                "bbox": {
+                    "x": 343.5,
+                    "y": 295.5,
+                    "width": 435.0,
+                    "height": 527.0
+                }
+            },
+            {
+                "prediction": "2- right lung",
+                "confidence": 0.9380676746368408,
+                "bbox": {
+                    "x": 457.5,
+                    "y": 287.0,
+                    "width": 201.0,
+                    "height": 496.0
+                }
+            },
+            {
+                "prediction": "3- heart",
+                "confidence": 0.9255927801132202,
+                "bbox": {
+                    "x": 375.0,
+                    "y": 313.0,
+                    "width": 192.0,
+                    "height": 310.0
+                }
+            },
+            {
+                "prediction": "6- humeral left",
+                "confidence": 0.7643330693244934,
+                "bbox": {
+                    "x": 66.0,
+                    "y": 158.5,
+                    "width": 130.0,
+                    "height": 149.0
+                }
+            }
+        ]
+    },
+    "xray_annotated": "output/annotated_images/xray_image_4_1.png"
+}
