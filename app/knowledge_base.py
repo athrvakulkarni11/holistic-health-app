@@ -10,9 +10,35 @@ from app.config import CHROMA_PERSIST_DIR, CHROMA_COLLECTION_NAME, KNOWLEDGE_BAS
 
 class KnowledgeBaseService:
     def __init__(self):
-        self.client = chromadb.PersistentClient(path=CHROMA_PERSIST_DIR)
+        self.client = None
         self.collection = None
+        self._init_client()
         self._initialize()
+
+    def _init_client(self):
+        """Initialize ChromaDB client with fallback to in-memory if persistent fails."""
+        try:
+            self.client = chromadb.PersistentClient(path=CHROMA_PERSIST_DIR)
+            print("[KB] Using PersistentClient (disk-backed).")
+        except Exception as e:
+            print(f"[KB] PersistentClient failed ({e}), falling back to in-memory client.")
+            # Clean up corrupted DB directory if it exists
+            import shutil
+            if os.path.exists(CHROMA_PERSIST_DIR):
+                try:
+                    shutil.rmtree(CHROMA_PERSIST_DIR)
+                    print("[KB] Removed corrupted chroma_db directory.")
+                except Exception:
+                    pass
+            # Try PersistentClient again with a fresh directory
+            try:
+                os.makedirs(CHROMA_PERSIST_DIR, exist_ok=True)
+                self.client = chromadb.PersistentClient(path=CHROMA_PERSIST_DIR)
+                print("[KB] Using PersistentClient (fresh directory).")
+            except Exception as e2:
+                print(f"[KB] PersistentClient retry failed ({e2}), using EphemeralClient.")
+                self.client = chromadb.EphemeralClient()
+                print("[KB] Using EphemeralClient (in-memory).")
 
     def _initialize(self):
         """Load biomarker reference data into ChromaDB."""
