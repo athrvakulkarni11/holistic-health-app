@@ -1,90 +1,32 @@
 """
-Knowledge Base service using ChromaDB for biomarker medical reference data.
-Loads curated medical data and enables semantic search for relevant information.
+Knowledge Base service — simple JSON-based biomarker reference lookup.
+No external dependencies (no ChromaDB, no embeddings).
+Loads curated medical data and enables keyword search for relevant information.
 """
 import json
 import os
-import chromadb
-from app.config import CHROMA_PERSIST_DIR, CHROMA_COLLECTION_NAME, KNOWLEDGE_BASE_DIR
+from app.config import KNOWLEDGE_BASE_DIR
 
 
 class KnowledgeBaseService:
     def __init__(self):
-        self.client = None
-        self.collection = None
-        self._init_client()
-        self._initialize()
+        self.biomarkers: list[dict] = []
+        self._load_data()
 
-    def _init_client(self):
-        """Initialize ChromaDB client with fallback to in-memory if persistent fails."""
-        try:
-            self.client = chromadb.PersistentClient(path=CHROMA_PERSIST_DIR)
-            print("[KB] Using PersistentClient (disk-backed).")
-        except Exception as e:
-            print(f"[KB] PersistentClient failed ({e}), falling back to in-memory client.")
-            # Clean up corrupted DB directory if it exists
-            import shutil
-            if os.path.exists(CHROMA_PERSIST_DIR):
-                try:
-                    shutil.rmtree(CHROMA_PERSIST_DIR)
-                    print("[KB] Removed corrupted chroma_db directory.")
-                except Exception:
-                    pass
-            # Try PersistentClient again with a fresh directory
-            try:
-                os.makedirs(CHROMA_PERSIST_DIR, exist_ok=True)
-                self.client = chromadb.PersistentClient(path=CHROMA_PERSIST_DIR)
-                print("[KB] Using PersistentClient (fresh directory).")
-            except Exception as e2:
-                print(f"[KB] PersistentClient retry failed ({e2}), using EphemeralClient.")
-                self.client = chromadb.EphemeralClient()
-                print("[KB] Using EphemeralClient (in-memory).")
-
-    def _initialize(self):
-        """Load biomarker reference data into ChromaDB."""
-        self.collection = self.client.get_or_create_collection(
-            name=CHROMA_COLLECTION_NAME,
-            metadata={"hnsw:space": "cosine"}
-        )
-
-        # Only load if collection is empty
-        if self.collection.count() == 0:
-            self._load_biomarker_data()
-
-    def _load_biomarker_data(self):
-        """Parse and load biomarker JSON into ChromaDB as searchable documents."""
+    def _load_data(self):
+        """Load biomarker reference data from JSON file."""
         json_path = os.path.join(KNOWLEDGE_BASE_DIR, "biomarker_references.json")
         if not os.path.exists(json_path):
             print(f"[KB] Warning: {json_path} not found. Knowledge base will be empty.")
             return
 
         with open(json_path, "r", encoding="utf-8") as f:
-            biomarkers = json.load(f)
+            self.biomarkers = json.load(f)
 
-        documents = []
-        metadatas = []
-        ids = []
-
-        for i, bm in enumerate(biomarkers):
-            # Create a rich text document for each biomarker
-            doc_text = self._biomarker_to_document(bm)
-            documents.append(doc_text)
-            metadatas.append({
-                "biomarker": bm["biomarker"],
-                "category": bm["category"],
-                "unit": bm["unit"],
-                "normal_low_male": str(bm["normal_range_male"]["low"]),
-                "normal_high_male": str(bm["normal_range_male"]["high"]),
-                "normal_low_female": str(bm["normal_range_female"]["low"]),
-                "normal_high_female": str(bm["normal_range_female"]["high"]),
-            })
-            ids.append(f"biomarker_{i}_{bm['biomarker'].lower().replace(' ', '_')}")
-
-        self.collection.add(documents=documents, metadatas=metadatas, ids=ids)
-        print(f"[KB] Loaded {len(documents)} biomarker references into knowledge base.")
+        print(f"[KB] Loaded {len(self.biomarkers)} biomarker references from JSON.")
 
     def _biomarker_to_document(self, bm: dict) -> str:
-        """Convert a biomarker dict into a searchable text document."""
+        """Convert a biomarker dict into a readable text document."""
         sections = [
             f"Biomarker: {bm['biomarker']}",
             f"Category: {bm['category']}",
@@ -105,63 +47,96 @@ class KnowledgeBaseService:
         ]
         return "\n".join(sections)
 
-    def search(self, query: str, n_results: int = 5) -> list[dict]:
-        """Semantic search the knowledge base."""
-        try:
-            count = self.collection.count()
-            if count == 0:
-                return []
-            results = self.collection.query(
-                query_texts=[query],
-                n_results=min(n_results, count),
-            )
+    def _relevance_score(self, query: str, bm: dict) -> float:
+        """Simple keyword-based relevance scoring."""
+        query_lower = query.lower()
+        query_words = query_lower.split()
+        score = 0.0
 
-            output = []
-            if results and results["documents"]:
-                for doc, meta, dist in zip(
-                    results["documents"][0],
-                    results["metadatas"][0],
-                    results["distances"][0],
-                ):
-                    output.append({
-                        "content": doc,
-                        "metadata": meta,
-                        "relevance_score": round(1 - dist, 4),
-                    })
-            return output
-        except Exception as e:
-            print(f"[KB] Search error: {e}")
+        # Direct biomarker name match (highest weight)
+        bm_name = bm["biomarker"].lower()
+        if bm_name in query_lower or query_lower in bm_name:
+            score += 10.0
+
+        # Category match
+        if bm["category"].lower() in query_lower:
+            score += 5.0
+
+        # Word overlap with biomarker name, description, causes, symptoms
+        searchable_text = " ".join([
+            bm["biomarker"],
+            bm["category"],
+            bm.get("description", ""),
+            " ".join(bm.get("low_causes", [])),
+            " ".join(bm.get("high_causes", [])),
+            " ".join(bm.get("low_symptoms", [])),
+            " ".join(bm.get("high_symptoms", [])),
+            " ".join(bm.get("related_biomarkers", [])),
+        ]).lower()
+
+        for word in query_words:
+            if len(word) > 2 and word in searchable_text:
+                score += 1.0
+
+        return score
+
+    def search(self, query: str, n_results: int = 5) -> list[dict]:
+        """Keyword-based search of the knowledge base."""
+        if not self.biomarkers:
             return []
 
+        scored = []
+        for bm in self.biomarkers:
+            score = self._relevance_score(query, bm)
+            if score > 0:
+                scored.append((score, bm))
+
+        # Sort by relevance, return top N
+        scored.sort(key=lambda x: x[0], reverse=True)
+        results = []
+        for score, bm in scored[:n_results]:
+            results.append({
+                "content": self._biomarker_to_document(bm),
+                "metadata": {
+                    "biomarker": bm["biomarker"],
+                    "category": bm["category"],
+                    "unit": bm["unit"],
+                },
+                "relevance_score": round(min(score / 10.0, 1.0), 4),
+            })
+        return results
+
     def get_biomarker_info(self, biomarker_name: str) -> dict | None:
-        """Get specific biomarker reference data."""
-        try:
-            count = self.collection.count()
-            if count == 0:
-                return None
-            results = self.collection.query(
-                query_texts=[biomarker_name],
-                n_results=1,
-                where={"biomarker": {"$eq": biomarker_name}} if biomarker_name else None,
-            )
-            if results and results["documents"] and results["documents"][0]:
+        """Get specific biomarker reference data by name."""
+        for bm in self.biomarkers:
+            if bm["biomarker"].lower() == biomarker_name.lower():
                 return {
-                    "content": results["documents"][0][0],
-                    "metadata": results["metadatas"][0][0],
+                    "content": self._biomarker_to_document(bm),
+                    "metadata": {
+                        "biomarker": bm["biomarker"],
+                        "category": bm["category"],
+                        "unit": bm["unit"],
+                    },
                 }
-        except Exception as e:
-            print(f"[KB] get_biomarker_info error: {e}")
+        # Fallback: partial match
+        for bm in self.biomarkers:
+            if biomarker_name.lower() in bm["biomarker"].lower():
+                return {
+                    "content": self._biomarker_to_document(bm),
+                    "metadata": {
+                        "biomarker": bm["biomarker"],
+                        "category": bm["category"],
+                        "unit": bm["unit"],
+                    },
+                }
         return None
 
     def get_all_biomarkers(self) -> list[str]:
         """Return all biomarker names in the knowledge base."""
-        all_data = self.collection.get()
-        if all_data and all_data["metadatas"]:
-            return [m["biomarker"] for m in all_data["metadatas"]]
-        return []
+        return [bm["biomarker"] for bm in self.biomarkers]
 
     def reload(self):
-        """Force reload the knowledge base."""
-        self.client.delete_collection(CHROMA_COLLECTION_NAME)
-        self._initialize()
-        return {"status": "reloaded", "count": self.collection.count()}
+        """Force reload the knowledge base from JSON."""
+        self.biomarkers = []
+        self._load_data()
+        return {"status": "reloaded", "count": len(self.biomarkers)}

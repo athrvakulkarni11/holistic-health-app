@@ -5,7 +5,6 @@ Serves the API endpoints and the static frontend.
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import router as api_router
 from app.config import HOST, PORT
 import uvicorn
 import os
@@ -25,8 +24,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include API router
-app.include_router(api_router, prefix="/api")
+# Lazy import to avoid loading heavy modules at import time
+@app.on_event("startup")
+async def startup_event():
+    from app.api import router as api_router
+    app.include_router(api_router, prefix="/api")
+    print("[App] API routes loaded.")
 
 # Serve static files (Frontend)
 static_dir = os.path.join(os.path.dirname(__file__), "static")
@@ -36,4 +39,7 @@ if not os.path.exists(static_dir):
 app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host=HOST, port=PORT, reload=True)
+    # Only use reload in local development, never in production
+    is_dev = os.getenv("ENVIRONMENT", "production").lower() == "development"
+    uvicorn.run("main:app", host=HOST, port=PORT, reload=is_dev)
+

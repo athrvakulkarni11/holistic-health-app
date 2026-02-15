@@ -13,9 +13,7 @@ GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
 # SerpAPI (Google Search)
 SERPAPI_KEY = os.getenv("SERPAPI_KEY", "")
 
-# ChromaDB
-CHROMA_PERSIST_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "chroma_db")
-CHROMA_COLLECTION_NAME = "biomarker_knowledge"
+# (ChromaDB removed — using simple JSON-based knowledge base)
 
 # Knowledge Base
 KNOWLEDGE_BASE_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "knowledge_base")
