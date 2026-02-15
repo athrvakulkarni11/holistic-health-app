@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HolisticAI | Health Analytics & Chat</title>
+    <meta name="description"
+        content="AI-powered health analytics — biomarker analysis, direct chat, and lab report upload.">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar glass" id="sidebar">
+            <div class="sidebar-top">
+                <div class="logo">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                    <span>HolisticAI</span>
+                </div>
+                <ul class="nav-links">
+                    <li class="active" data-tab="form-tab">
+                        <a href="#form"><i class="fa-solid fa-flask-vial"></i> Biomarker Form</a>
+                    </li>
+                    <li data-tab="chat-tab">
+                        <a href="#chat"><i class="fa-solid fa-comments"></i> Chat with AI</a>
+                    </li>
+                    <li data-tab="upload-tab">
+                        <a href="#upload"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Reports</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="sidebar-footer">
+                <div class="sidebar-divider"></div>
+                <div class="status-indicator">
+                    <span class="status-dot online"></span>
+                    <span>AI Engine Online</span>
+                </div>
+                <div class="user-mini">
+                    <img src="https://ui-avatars.com/api/?name=User&background=0d1117&color=00f2ea&bold=true" alt="User"
+                        class="avatar">
+                    <div class="user-info">
+                        <h4>Guest User</h4>
+                        <p>Health Analytics</p>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Navigation Bar -->
+            <header class="top-bar glass">
+                <button class="mobile-menu-btn btn-icon" id="mobile-menu-btn">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="page-title">
+                    <h1 id="page-heading">Biomarker Analysis</h1>
+                    <p id="page-subtitle">Unlock insights from your blood work using AI.</p>
+                </div>
+                <div class="actions">
+                    <button class="btn-icon" title="Notifications"><i class="fa-regular fa-bell"></i></button>
+                    <button class="btn-primary" id="new-analysis-btn"><i class="fa-solid fa-plus"></i> New</button>
+                </div>
+            </header>
+
+            <div class="content-scroll">
+                <!-- ═══════════════════════════════════════════════
+                     TAB 1: BIOMARKER FORM
+                     ═══════════════════════════════════════════════ -->
+                <section id="form-tab" class="tab-content active fade-in">
+                    <div id="input-section">
+                        <div class="card glass-card form-container">
+                            <div class="form-header">
+                                <div class="form-header-icon">
+                                    <i class="fa-solid fa-flask"></i>
+                                </div>
+                                <h2>Enter Your Lab Data</h2>
+                                <p>Provide your recent lab results for a comprehensive AI-powered health analysis.</p>
+                            </div>
+
+                            <form id="biomarker-form">
+                                <!-- User Profile -->
+                                <fieldset>
+                                    <legend><i class="fa-solid fa-user"></i> Profile</legend>
+                                    <div class="grid-2">
+                                        <div class="input-group">
+                                            <label for="age">Age (yrs)</label>
+                                            <input type="number" id="age" name="age" min="1" max="120"
+                                                placeholder="e.g., 35" required>
+                                        </div>
+                                        <div class="input-group">
+                                            <label for="gender">Gender</label>
+                                            <select id="gender" name="gender" required>
+                                                <option value="" disabled selected>Select gender...</option>
+                                                <option value="male">Male</option>
+                                                <option value="female">Female</option>
+                                            </select>
+                                        </div>
+                                        <div class="input-group">
+                                            <label for="height">Height (cm)</label>
+                                            <input type="number" id="height" name="height" min="50" max="300"
+                                                placeholder="e.g., 175">
+                                        </div>
+                                        <div class="input-group">
+                                            <label for="weight">Weight (kg)</label>
+                                            <input type="number" id="weight" name="weight" min="20" max="500"
+                                                placeholder="e.g., 70">
+                                        </div>
+                                    </div>
+                                </fieldset>
+
+                                <!-- Blood & Nutrient Status -->
+                                <fieldset>
+                                    <legend><i class="fa-solid fa-droplet"></i> Blood & Nutrient Status</legend>
+                                    <div class="grid-3">
+                                        <div class="input-group">
+                                            <label for="hemoglobin">Hemoglobin (g/dL)</label>
+                                            <input type="number" step="0.1" id="hemoglobin" name="hemoglobin"
+                                                placeholder="12-18">
+                                        </div>
+                                        <div class="input-group">
+                                            <label for="rbc_count">RBC Count (M/mcL)</label>
+                                            <input type="number" step="0.01" id="rbc_count" name="rbc_count"
+                                                placeholder="4-6">
+                                        </div>
+                                        <div class="input-group">
+                                            <label for="ferritin">Ferritin (ng/mL)</label>
+                                            <input type="number" step="1" id="ferritin" name="ferritin"
+                                                placeholder="10-300">
+                                        </div>
+                                        <div class="input-group">
+                                            <label for="vitamin_b12">Vitamin B12 (pg/mL)</label>
+                                            <input type="number" step="1" id="vitamin_b12" name="vitamin_b12"
+                                                placeholder="200-900">
+                                        </div>
+                                        <div class="input-group">
+                                            <label for="vitamin_d">Vitamin D (ng/mL)</label>
+                                            <input type="number" step="0.1" id="vitamin_d" name="vitamin_d"
+                                                placeholder="30-100">
+                                        </div>
+                                    </div>
+                                </fieldset>
+
+                                <!-- Metabolic Health -->
+                                <fieldset>
+                                    <legend><i class="fa-solid fa-fire"></i> Metabolic Health</legend>
+                                    <div class="grid-2">
+                                        <div class="input-group">
+                                            <label for="fasting_glucose">Fasting Glucose (mg/dL)</label>
+                                            <input type="number" step="1" id="fasting_glucose" name="fasting_glucose"
+                                                placeholder="70-100">
+                                        </div>
+                                        <div class="input-group">
+                                            <label for="hba1c">HbA1c (%)</label>
+                                            <input type="number" step="0.1" id="hba1c" name="hba1c" placeholder="4-6">
+                                        </div>
+                                    </div>
+                                </fieldset>
+
+                                <!-- Lipid Profile -->
+                                <fieldset>
+                                    <legend><i class="fa-solid fa-chart-pie"></i> Lipid Profile</legend>
+                                    <div class="grid-2">
+                                        <div class="input-group">
+                                            <label for="total_cholesterol">Total Cholesterol (mg/dL)</label>
+                                            <input type="number" step="1" id="total_cholesterol"
+                                                name="total_cholesterol" placeholder="<200">
+                                        </div>
+                                        <div class="input-group">
+                                            <label for="ldl">LDL (mg/dL)</label>
+                                            <input type="number" step="1" id="ldl" name="ldl" placeholder="<100">
+                                        </div>
+                                        <div class="input-group">
+                                            <label for="hdl">HDL (mg/dL)</label>
+                                            <input type="number" step="1" id="hdl" name="hdl" placeholder=">40">
+                                        </div>
+                                        <div class="input-group">
+                                            <label for="triglycerides">Triglycerides (mg/dL)</label>
+                                            <input type="number" step="1" id="triglycerides" name="triglycerides"
+                                                placeholder="<150">
+                                        </div>
+                                    </div>
+                                </fieldset>
+
+                                <!-- Inflammation & Organs -->
+                                <fieldset>
+                                    <legend><i class="fa-solid fa-shield-virus"></i> Inflammation & Organ Function
+                                    </legend>
+                                    <div class="grid-3">
+                                        <div class="input-group">
+                                            <label for="hs_crp">hs-CRP (mg/L)</label>
+                                            <input type="number" step="0.1" id="hs_crp" name="hs_crp"
+                                                placeholder="<3.0">
+                                        </div>
+                                        <div class="input-group">
+                                            <label for="tsh">TSH (mIU/L)</label>
+                                            <input type="number" step="0.01" id="tsh" name="tsh" placeholder="0.4-4.0">
+                                        </div>
+                                        <div class="input-group">
+                                            <label for="sgpt_alt">SGPT / ALT (U/L)</label>
+                                            <input type="number" step="1" id="sgpt_alt" name="sgpt_alt"
+                                                placeholder="7-56">
+                                        </div>
+                                    </div>
+                                </fieldset>
+
+                                <div class="form-actions">
+                                    <button type="button" id="fill-demo-btn" class="btn-secondary"><i
+                                            class="fa-solid fa-wand-magic-sparkles"></i> Fill Demo Data</button>
+                                    <button type="submit" class="btn-primary lg"><i class="fa-solid fa-microscope"></i>
+                                        Generate Analysis</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="loading-overlay" class="hidden">
+                        <div class="loader-content glass">
+                            <div class="spinner"></div>
+                            <h3>Analyzing Biomarkers...</h3>
+                            <p id="loading-text">Consulting medical knowledge base...</p>
+                        </div>
+                    </div>
+
+                    <!-- Results Section -->
+                    <section id="results-section" class="hidden fade-in">
+                        <div class="hero-score glass-card">
+                            <div class="score-circle-container">
+                                <svg class="score-ring" width="160" height="160">
+                                    <circle class="ring-bg" cx="80" cy="80" r="70"></circle>
+                                    <circle class="ring-progress" cx="80" cy="80" r="70" stroke-dasharray="440"
+                                        stroke-dashoffset="440"></circle>
+                                </svg>
+                                <div class="score-value">
+                                    <span id="main-score">--</span>
+                                    <small>Health Score</small>
+                                </div>
+                            </div>
+                            <div class="score-details">
+                                <h2 id="score-level">--</h2>
+                                <p id="score-summary">Analysis pending...</p>
+                                <div class="stat-badges">
+                                    <span class="badge" id="abnormal-count">0 Abnormal</span>
+                                    <span class="badge" id="risk-count">0 Risks Identified</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Score Breakdown -->
+                        <div class="card glass-card score-breakdown-card">
+                            <h3><i class="fa-solid fa-chart-bar"></i> Score Breakdown</h3>
+                            <p id="score-interpretation" class="score-interpretation-text">Loading...</p>
+                            <div id="score-breakdown" class="score-breakdown-grid"></div>
+                            <div id="score-top-contributors" class="top-contributors"></div>
+                        </div>
+
+                        <!-- Priority Action Plan -->
+                        <div class="card glass-card priority-card">
+                            <h3><i class="fa-solid fa-list-ol"></i> Priority Action Plan</h3>
+                            <p class="info-text"><i class="fa-solid fa-circle-info"></i> Ordered from most urgent to
+                                least. Address items in this order for maximum health impact.</p>
+                            <div id="priority-actions-list" class="priority-actions"></div>
+                        </div>
+
+                        <div class="results-grid">
+                            <div class="col-left">
+                                <div class="card glass-card">
+                                    <h3><i class="fa-solid fa-magnifying-glass-chart"></i> Key Findings</h3>
+                                    <div id="key-findings-list" class="findings-list"></div>
+                                </div>
+                                <div class="card glass-card">
+                                    <h3><i class="fa-solid fa-triangle-exclamation"></i> Health Risks</h3>
+                                    <div id="health-risks-list" class="risks-list"></div>
+                                </div>
+                            </div>
+                            <div class="col-right">
+                                <div class="card glass-card recommendations">
+                                    <h3><i class="fa-solid fa-apple-whole"></i> Nutrition Plan</h3>
+                                    <ul id="nutrition-list" class="styled-list"></ul>
+                                </div>
+                                <div class="card glass-card recommendations">
+                                    <h3><i class="fa-solid fa-person-running"></i> Lifestyle Changes</h3>
+                                    <ul id="lifestyle-list" class="styled-list"></ul>
+                                </div>
+                                <div class="card glass-card recommendations">
+                                    <h3><i class="fa-solid fa-pills"></i> Supplementation</h3>
+                                    <ul id="supplements-list" class="styled-list"></ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card glass-card footer-info">
+                            <h3><i class="fa-solid fa-user-doctor"></i> Suggested Follow-up</h3>
+                            <div id="follow-up-list" class="tags-container"></div>
+
+                            <!-- Positive Findings -->
+                            <div id="positive-findings-section" class="positive-findings hidden">
+                                <h4><i class="fa-solid fa-circle-check"></i> Positive Findings</h4>
+                                <ul id="positive-findings-list" class="styled-list positive"></ul>
+                            </div>
+
+                            <!-- Web Sources -->
+                            <div id="web-sources-section" class="sources-section hidden">
+                                <h4><i class="fa-solid fa-globe"></i> Research Sources</h4>
+                                <div id="web-sources-list" class="sources-list"></div>
+                            </div>
+
+                            <div class="disclaimer-box">
+                                <p id="disclaimer-text"><strong>Disclaimer:</strong> This analysis is generated by AI
+                                    and is for informational purposes only. It is not a substitute for professional
+                                    medical advice, diagnosis, or treatment.</p>
+                            </div>
+                            <button id="back-to-form-btn" class="btn-secondary"><i class="fa-solid fa-arrow-left"></i>
+                                Analyze Another Profile</button>
+                        </div>
+                    </section>
+                </section>
+
+                <!-- ═══════════════════════════════════════════════
+                     TAB 2: CHAT INTERFACE
+                     ═══════════════════════════════════════════════ -->
+                <section id="chat-tab" class="tab-content fade-in">
+                    <div class="chat-container">
+                        <!-- Chat messages area -->
+                        <div class="chat-messages" id="chat-messages">
+                            <div class="chat-welcome">
+                                <div class="welcome-icon">
+                                    <i class="fa-solid fa-robot"></i>
+                                </div>
+                                <h2>Welcome to HolisticAI Chat</h2>
+                                <p>Ask me anything about your health, biomarkers, nutrition, or wellness. You can also
+                                    upload files directly in the chat.</p>
+                                <div class="quick-prompts">
+                                    <button class="quick-prompt"
+                                        data-prompt="What does high LDL cholesterol mean and how can I reduce it?">
+                                        <i class="fa-solid fa-heart"></i> High LDL Cholesterol
+                                    </button>
+                                    <button class="quick-prompt"
+                                        data-prompt="What are the best foods for reducing inflammation based on hs-CRP levels?">
+                                        <i class="fa-solid fa-apple-whole"></i> Anti-Inflammatory Diet
+                                    </button>
+                                    <button class="quick-prompt"
+                                        data-prompt="My Vitamin D is 18 ng/mL. Is this concerning and what should I do?">
+                                        <i class="fa-solid fa-sun"></i> Low Vitamin D
+                                    </button>
+                                    <button class="quick-prompt"
+                                        data-prompt="Explain the relationship between HbA1c and diabetes risk">
+                                        <i class="fa-solid fa-droplet"></i> HbA1c & Diabetes
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat input area -->
+                        <div class="chat-input-area glass">
+                            <div class="chat-file-preview hidden" id="chat-file-preview">
+                                <div class="file-preview-content">
+                                    <i class="fa-solid fa-file-medical"></i>
+                                    <span id="chat-file-name">filename.pdf</span>
+                                    <button class="file-remove-btn" id="chat-file-remove" title="Remove file">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="chat-input-row">
+                                <label class="chat-attach-btn" for="chat-file-input" title="Attach a file">
+                                    <i class="fa-solid fa-paperclip"></i>
+                                </label>
+                                <input type="file" id="chat-file-input" accept=".pdf,.png,.jpg,.jpeg,.csv,.txt,.docx"
+                                    hidden>
+                                <textarea id="chat-input"
+                                    placeholder="Ask about your health, biomarkers, or upload a lab report..."
+                                    rows="1"></textarea>
+                                <button id="chat-send-btn" class="btn-primary chat-send" title="Send message">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ═══════════════════════════════════════════════
+                     TAB 3: FILE UPLOAD
+                     ═══════════════════════════════════════════════ -->
+                <section id="upload-tab" class="tab-content fade-in">
+                    <div class="upload-container">
+                        <div class="card glass-card upload-zone-card">
+                            <div class="form-header">
+                                <div class="form-header-icon upload-icon">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                                </div>
+                                <h2>Upload Lab Reports</h2>
+                                <p>Upload your lab report files and let AI extract and analyze your biomarkers
+                                    automatically.</p>
+                            </div>
+
+                            <!-- Drop Zone -->
+                            <div class="upload-drop-zone" id="upload-drop-zone">
+                                <div class="drop-zone-content">
+                                    <div class="drop-icon">
+                                        <i class="fa-solid fa-file-arrow-up"></i>
+                                    </div>
+                                    <h3>Drag & Drop Files Here</h3>
+                                    <p>or click to browse</p>
+                                    <div class="supported-formats">
+                                        <span class="format-badge">PDF</span>
+                                        <span class="format-badge">PNG</span>
+                                        <span class="format-badge">JPG</span>
+                                        <span class="format-badge">CSV</span>
+                                        <span class="format-badge">TXT</span>
+                                        <span class="format-badge">DOCX</span>
+                                    </div>
+                                    <small>Max file size: 10MB</small>
+                                </div>
+                                <input type="file" id="upload-file-input" accept=".pdf,.png,.jpg,.jpeg,.csv,.txt,.docx"
+                                    hidden>
+                            </div>
+
+                            <!-- Upload Progress -->
+                            <div class="upload-progress hidden" id="upload-progress">
+                                <div class="progress-file-info">
+                                    <i class="fa-solid fa-file-medical"></i>
+                                    <span id="upload-file-name">file.pdf</span>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar" id="upload-progress-bar"></div>
+                                </div>
+                                <span class="progress-text" id="upload-progress-text">Processing...</span>
+                            </div>
+                        </div>
+
+                        <!-- Upload Results -->
+                        <div class="card glass-card hidden" id="upload-results-card">
+                            <h3><i class="fa-solid fa-file-circle-check"></i> Extraction Results</h3>
+
+                            <!-- Raw Text Toggle -->
+                            <div class="extraction-section">
+                                <button class="collapsible-toggle" id="raw-text-toggle">
+                                    <i class="fa-solid fa-file-lines"></i> View Extracted Text
+                                    <i class="fa-solid fa-chevron-down toggle-arrow"></i>
+                                </button>
+                                <div class="collapsible-content hidden" id="raw-text-content">
+                                    <pre id="raw-text-display"></pre>
+                                </div>
+                            </div>
+
+                            <!-- Extracted Biomarkers -->
+                            <div class="extraction-section">
+                                <h4><i class="fa-solid fa-vials"></i> Extracted Biomarkers</h4>
+                                <div id="extracted-biomarkers-grid" class="extracted-grid"></div>
+                            </div>
+
+                            <!-- Profile from file -->
+                            <div class="extraction-section hidden" id="extracted-profile-section">
+                                <h4><i class="fa-solid fa-user"></i> Detected Profile</h4>
+                                <div id="extracted-profile-info"></div>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="upload-actions">
+                                <div class="profile-override" id="profile-override-section">
+                                    <p class="info-text"><i class="fa-solid fa-circle-info"></i> You can provide or
+                                        override profile data for analysis:</p>
+                                    <div class="grid-2">
+                                        <div class="input-group">
+                                            <label for="upload-age">Age (yrs)</label>
+                                            <input type="number" id="upload-age" min="1" max="120"
+                                                placeholder="e.g., 35">
+                                        </div>
+                                        <div class="input-group">
+                                            <label for="upload-gender">Gender</label>
+                                            <select id="upload-gender">
+                                                <option value="" disabled selected>Select...</option>
+                                                <option value="male">Male</option>
+                                                <option value="female">Female</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-actions">
+                                    <button class="btn-secondary" id="upload-another-btn"><i
+                                            class="fa-solid fa-rotate"></i> Upload Another File</button>
+                                    <button class="btn-primary lg" id="run-analysis-btn"><i
+                                            class="fa-solid fa-microscope"></i> Run Full Analysis</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Analysis Results (reused from form) -->
+                        <section id="upload-analysis-results" class="hidden fade-in">
+                            <div class="hero-score glass-card">
+                                <div class="score-circle-container">
+                                    <svg class="score-ring upload-score-ring" width="160" height="160">
+                                        <circle class="ring-bg" cx="80" cy="80" r="70"></circle>
+                                        <circle class="ring-progress" cx="80" cy="80" r="70" stroke-dasharray="440"
+                                            stroke-dashoffset="440"></circle>
+                                    </svg>
+                                    <div class="score-value">
+                                        <span id="upload-main-score">--</span>
+                                        <small>Health Score</small>
+                                    </div>
+                                </div>
+                                <div class="score-details">
+                                    <h2 id="upload-score-level">--</h2>
+                                    <p id="upload-score-summary">Analysis pending...</p>
+                                </div>
+                            </div>
+
+                            <!-- Score Breakdown (Upload) -->
+                            <div class="card glass-card score-breakdown-card">
+                                <h3><i class="fa-solid fa-chart-bar"></i> Score Breakdown</h3>
+                                <p id="upload-score-interpretation" class="score-interpretation-text">Loading...</p>
+                                <div id="upload-score-breakdown" class="score-breakdown-grid"></div>
+                                <div id="upload-score-top-contributors" class="top-contributors"></div>
+                            </div>
+
+                            <!-- Priority Action Plan (Upload) -->
+                            <div class="card glass-card priority-card">
+                                <h3><i class="fa-solid fa-list-ol"></i> Priority Action Plan</h3>
+                                <p class="info-text"><i class="fa-solid fa-circle-info"></i> Ordered from most urgent to
+                                    least.</p>
+                                <div id="upload-priority-actions" class="priority-actions"></div>
+                            </div>
+                            <div class="results-grid">
+                                <div class="col-left">
+                                    <div class="card glass-card">
+                                        <h3><i class="fa-solid fa-magnifying-glass-chart"></i> Key Findings</h3>
+                                        <div id="upload-key-findings" class="findings-list"></div>
+                                    </div>
+                                    <div class="card glass-card">
+                                        <h3><i class="fa-solid fa-triangle-exclamation"></i> Health Risks</h3>
+                                        <div id="upload-health-risks" class="risks-list"></div>
+                                    </div>
+                                </div>
+                                <div class="col-right">
+                                    <div class="card glass-card recommendations">
+                                        <h3><i class="fa-solid fa-apple-whole"></i> Nutrition Plan</h3>
+                                        <ul id="upload-nutrition" class="styled-list"></ul>
+                                    </div>
+                                    <div class="card glass-card recommendations">
+                                        <h3><i class="fa-solid fa-person-running"></i> Lifestyle Changes</h3>
+                                        <ul id="upload-lifestyle" class="styled-list"></ul>
+                                    </div>
+                                    <div class="card glass-card recommendations">
+                                        <h3><i class="fa-solid fa-pills"></i> Supplementation</h3>
+                                        <ul id="upload-supplements" class="styled-list"></ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card glass-card footer-info">
+                                <!-- Positive Findings (Upload) -->
+                                <div id="upload-positive-section" class="positive-findings hidden">
+                                    <h4><i class="fa-solid fa-circle-check"></i> Positive Findings</h4>
+                                    <ul id="upload-positive-list" class="styled-list positive"></ul>
+                                </div>
+
+                                <!-- Web Sources (Upload) -->
+                                <div id="upload-sources-section" class="sources-section hidden">
+                                    <h4><i class="fa-solid fa-globe"></i> Research Sources</h4>
+                                    <div id="upload-sources-list" class="sources-list"></div>
+                                </div>
+
+                                <div class="disclaimer-box">
+                                    <p><strong>Disclaimer:</strong> This analysis is generated by AI from your uploaded
+                                        report. Always consult a healthcare professional.</p>
+                                </div>
+                                <button id="upload-back-btn" class="btn-secondary"><i
+                                        class="fa-solid fa-arrow-left"></i> Upload Another Report</button>
+                            </div>
+                        </section>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+
+</html>
