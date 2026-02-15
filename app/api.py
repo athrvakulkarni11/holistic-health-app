@@ -57,6 +57,8 @@ async def chat_with_agent(request: ChatRequest):
         )
         return result
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         print(f"Chat error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 

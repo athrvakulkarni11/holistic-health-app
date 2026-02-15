@@ -107,37 +107,50 @@ class KnowledgeBaseService:
 
     def search(self, query: str, n_results: int = 5) -> list[dict]:
         """Semantic search the knowledge base."""
-        results = self.collection.query(
-            query_texts=[query],
-            n_results=min(n_results, self.collection.count()),
-        )
+        try:
+            count = self.collection.count()
+            if count == 0:
+                return []
+            results = self.collection.query(
+                query_texts=[query],
+                n_results=min(n_results, count),
+            )
 
-        output = []
-        if results and results["documents"]:
-            for doc, meta, dist in zip(
-                results["documents"][0],
-                results["metadatas"][0],
-                results["distances"][0],
-            ):
-                output.append({
-                    "content": doc,
-                    "metadata": meta,
-                    "relevance_score": round(1 - dist, 4),
-                })
-        return output
+            output = []
+            if results and results["documents"]:
+                for doc, meta, dist in zip(
+                    results["documents"][0],
+                    results["metadatas"][0],
+                    results["distances"][0],
+                ):
+                    output.append({
+                        "content": doc,
+                        "metadata": meta,
+                        "relevance_score": round(1 - dist, 4),
+                    })
+            return output
+        except Exception as e:
+            print(f"[KB] Search error: {e}")
+            return []
 
     def get_biomarker_info(self, biomarker_name: str) -> dict | None:
         """Get specific biomarker reference data."""
-        results = self.collection.query(
-            query_texts=[biomarker_name],
-            n_results=1,
-            where={"biomarker": {"$eq": biomarker_name}} if biomarker_name else None,
-        )
-        if results and results["documents"] and results["documents"][0]:
-            return {
-                "content": results["documents"][0][0],
-                "metadata": results["metadatas"][0][0],
-            }
+        try:
+            count = self.collection.count()
+            if count == 0:
+                return None
+            results = self.collection.query(
+                query_texts=[biomarker_name],
+                n_results=1,
+                where={"biomarker": {"$eq": biomarker_name}} if biomarker_name else None,
+            )
+            if results and results["documents"] and results["documents"][0]:
+                return {
+                    "content": results["documents"][0][0],
+                    "metadata": results["metadatas"][0][0],
+                }
+        except Exception as e:
+            print(f"[KB] get_biomarker_info error: {e}")
         return None
 
     def get_all_biomarkers(self) -> list[str]:
