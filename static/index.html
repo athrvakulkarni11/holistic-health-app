@@ -586,6 +586,36 @@
         </main>
     </div>
 
+    <!-- Medical Disclaimer Modal -->
+    <div id="disclaimer-modal" class="modal-overlay">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <i class="fa-solid fa-user-doctor modal-icon"></i>
+                <h2>Medical Disclaimer</h2>
+            </div>
+            <div class="modal-body">
+                <p><strong>Please simulate careful review of this important information:</strong></p>
+                <ul>
+                    <li>This AI application is for <strong>informational purposes only</strong>.</li>
+                    <li>It provides general wellness information, <strong>not medical diagnosis or treatment</strong>.
+                    </li>
+                    <li><strong>Always consult a qualified healthcare provider</strong> for any medical condition.</li>
+                    <li><strong>Do not disregard professional medical advice</strong> or delay seeking it because of
+                        something you have read on this app.</li>
+                    <li>If you think you may have a medical emergency, <strong>call your doctor or emergency services
+                            immediately</strong>.</li>
+                </ul>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="agree-checkbox">
+                    <label for="agree-checkbox">I understand and agree to these terms.</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="accept-disclaimer-btn" class="btn-primary" disabled>I Agree & Continue</button>
+            </div>
+        </div>
+    </div>
+
     <script src="js/app.js"></script>
 </body>
 

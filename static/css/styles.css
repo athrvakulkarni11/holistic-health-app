@@ -1853,3 +1853,135 @@ textarea::placeholder {
     background: var(--danger-bg);
     color: var(--danger);
 }
+
+/* ─── Medical Disclaimer Modal ────────────────────────── */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(10, 14, 26, 0.95);
+    backdrop-filter: blur(12px);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.modal-content {
+    width: 90%;
+    max-width: 600px;
+    background: var(--glass-bg);
+    border: 1px solid var(--secondary);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+    animation: modal-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    flex-direction: column;
+}
+
+@keyframes modal-pop {
+    0% {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    background: rgba(168, 85, 247, 0.1);
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.modal-icon {
+    font-size: 1.5rem;
+    color: var(--secondary);
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    color: var(--text-main);
+}
+
+.modal-body {
+    padding: 2rem;
+    color: var(--text-muted);
+    font-size: 1rem;
+}
+
+.modal-body ul {
+    margin: 1rem 0 2rem;
+    padding-left: 1.5rem;
+    list-style-type: disc;
+}
+
+.modal-body li {
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+}
+
+.modal-body strong {
+    color: var(--text-main);
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--glass-border);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.checkbox-wrapper:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--text-dim);
+}
+
+.checkbox-wrapper input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--primary);
+}
+
+.checkbox-wrapper label {
+    cursor: pointer;
+    color: var(--text-main);
+    font-weight: 500;
+}
+
+.modal-footer {
+    padding: 1.25rem 2rem;
+    border-top: 1px solid var(--glass-border);
+    display: flex;
+    justify-content: flex-end;
+}
+
+#accept-disclaimer-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(1);
+}

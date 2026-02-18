@@ -208,6 +208,13 @@ async def chat_with_file(
             # Extract text from file
             filepath = file_processor.save_file(file.filename, content)
             file_text = file_processor.extract_text(filepath)
+            
+            # Privacy Guard Rail: Clean up file
+            try:
+                if os.path.exists(filepath):
+                    os.remove(filepath)
+            except Exception as e:
+                print(f"Warning: Could not delete temporary file {filepath}: {e}")
         except HTTPException:
             raise
         except Exception as e:

@@ -217,6 +217,13 @@ Return only valid JSON with the extracted values."""
         """
         filepath = self.save_file(filename, content)
         raw_text = self.extract_text(filepath)
+        
+        # Privacy Guard Rail: Delete file after extraction
+        try:
+            if os.path.exists(filepath):
+                os.remove(filepath)
+        except Exception as e:
+            print(f"Error deleting file {filepath}: {e}")
 
         if raw_text.startswith("Error") or raw_text.startswith("Unsupported"):
             return {"success": False, "error": raw_text, "raw_text": ""}

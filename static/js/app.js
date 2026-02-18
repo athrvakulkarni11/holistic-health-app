@@ -55,6 +55,38 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastUploadedData = null;
 
     // ═══════════════════════════════════════════════════
+    //   DISCLAIMER MODAL
+    // ═══════════════════════════════════════════════════
+    const disclaimerModal = document.getElementById('disclaimer-modal');
+    const agreeCheckbox = document.getElementById('agree-checkbox');
+    const acceptDisclaimerBtn = document.getElementById('accept-disclaimer-btn');
+
+    // Check if previously accepted
+    if (!localStorage.getItem('medical_disclaimer_accepted')) {
+        // Show modal after a short delay
+        setTimeout(() => {
+            disclaimerModal.classList.add('active');
+        }, 800);
+    } else {
+        // Already accepted, ensure it's hidden
+        disclaimerModal.classList.remove('active');
+    }
+
+    agreeCheckbox.addEventListener('change', (e) => {
+        if (e.target.checked) {
+            acceptDisclaimerBtn.removeAttribute('disabled');
+        } else {
+            acceptDisclaimerBtn.setAttribute('disabled', 'true');
+        }
+    });
+
+    acceptDisclaimerBtn.addEventListener('click', () => {
+        localStorage.setItem('medical_disclaimer_accepted', 'true');
+        disclaimerModal.classList.remove('active');
+        showToast('Welcome to HolisticAI. Stay healthy!', 'success');
+    });
+
+    // ═══════════════════════════════════════════════════
     //   TAB NAVIGATION
     // ═══════════════════════════════════════════════════
     const tabConfig = {

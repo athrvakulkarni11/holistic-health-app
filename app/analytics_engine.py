@@ -398,6 +398,12 @@ HEALTH SCORE CONVENTION:
 - 0 = critical, all markers severely abnormal
 - Category health scores follow the same convention
 
+
+DISCLAIMER AND SAFETY RULES:
+- Include a clear disclaimer field stating that this is an AI analysis and not a substitute for professional medical advice.
+- If any values are Critical/Panic values (e.g., Glucose < 50 or > 400, Hemoglobin < 7, Troponin high), add an IMMEDIATE action to "Seek emergency medical attention".
+- Maintain a supportive, professional, and objective tone. Avoid alarmist language unless there is an immediate life-threatening risk.
+
 Respond ONLY with valid JSON in this EXACT structure:
 {
   "summary": "A 3-4 sentence clinical summary. Mention the health score (X/100) and what it means. List the affected systems by name (e.g., 'Abnormalities were detected across blood health, nutritional, metabolic, cardiovascular, inflammatory, and hormonal systems'). Be specific about conditions. Example: 'Findings are consistent with iron-deficiency anemia, prediabetes (per ADA criteria), mixed dyslipidemia, and subclinical hypothyroidism.'",

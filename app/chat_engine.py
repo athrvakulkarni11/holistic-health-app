@@ -4,6 +4,7 @@ Maintains conversation history and uses knowledge base + web search for
 evidence-based responses. Supports file context injection.
 """
 import json
+import re
 import uuid
 from datetime import datetime
 from groq import Groq
@@ -110,6 +111,32 @@ When lab data or file context is provided, proactively analyze all values and fl
 
         return "\n\n".join(context_parts) if context_parts else ""
 
+    def _check_safety(self, message: str) -> str:
+        """
+        Check for emergency keywords and return a safety intervention message if needed.
+        Returns None if no safety intervention is required.
+        """
+        emergency_keywords = [
+            "suicide", "kill myself", "want to die", "end my life",
+            "heart attack", "chest pain", "stroke", "difficulty breathing",
+            "call 911", "emergency", "overdose", "bleeding profusely"
+        ]
+        
+        message_lower = message.lower()
+        for keyword in emergency_keywords:
+            if keyword in message_lower:
+                return (
+                    "**⚠️ MEDICAL EMERGENCY WARNING**\n\n"
+                    "It sounds like you may be experiencing a medical emergency or crisis. "
+                    "**I am an AI, not a doctor, and I cannot help in emergencies.**\n\n"
+                    "Please take immediate action:\n"
+                    "- **Call 911** or your local emergency number immediately.\n"
+                    "- Go to the nearest emergency room.\n"
+                    "- If you are in mental health crisis, call or text **988** (Suicide & Crisis Lifeline).\n\n"
+                    "Your safety is the most important thing right now. Please get professional help immediately."
+                )
+        return None
+
     def chat(self, session_id: str, user_message: str, file_text: str = None) -> dict:
         """
         Process a chat message and return AI response.
@@ -139,6 +166,19 @@ When lab data or file context is provided, proactively analyze all values and fl
         full_message = enriched_message
         if external_context:
             full_message += f"\n\n[REFERENCE CONTEXT - Use this to provide accurate information:]\n{external_context}"
+
+        # 🚨 SAFETY CHECK INTERCEPTION 🚨
+        safety_response = self._check_safety(user_message)
+        if safety_response:
+             # Add to history so user sees it
+            session.add_message("user", user_message)
+            session.add_message("assistant", safety_response)
+            return {
+                "session_id": session.session_id,
+                "response": safety_response,
+                "error": False,
+                "sources_used": False,
+            }
 
         # Add to session history
         session.add_message("user", user_message)  # Store original for display
