@@ -5,6 +5,9 @@ Supports:
   2. Direct chat interface (/api/chat)
   3. File upload & processing (/api/upload)
   4. Chat with file attachment (/api/chat/upload)
+
+v2: Integrated guardrails — file safety scanning, critical value alerts,
+    and input sanitization on all endpoints.
 """
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from fastapi.responses import JSONResponse
@@ -17,6 +20,13 @@ from app.analytics_engine import BiomarkerAnalyticsEngine
 from app.chat_engine import ChatEngine
 from app.file_processor import FileProcessorService
 from app.config import ALLOWED_EXTENSIONS, MAX_UPLOAD_SIZE_MB
+from app.guardrails import (
+    scan_file_content,
+    check_critical_values,
+    sanitize_input,
+    log_safety_event,
+    MEDICAL_DISCLAIMER,
+)
 from typing import Optional
 import os
 
@@ -27,20 +37,43 @@ file_processor = FileProcessorService()
 
 
 # ─── 1. BIOMARKER FORM ANALYSIS ─────────────────────────────
-@router.post("/analyze", response_model=AnalysisResponse)
+@router.post("/analyze")
 async def analyze_biomarkers(request: AnalysisRequest):
     """
     Analyze user biomarkers and profile to provide health suggestions.
     Used by the form-based input mechanism.
+    
+    Guardrails: Checks for critical/panic biomarker values and includes
+    emergency alerts in the response when detected.
     """
     try:
         profile_dict = request.profile.model_dump()
         biomarkers_dict = request.biomarkers.model_dump()
+
+        # ━━━ GUARDRAIL: Check for critical/panic values ━━━
+        clean_biomarkers = {k: v for k, v in biomarkers_dict.items() if v is not None}
+        critical_findings = check_critical_values(clean_biomarkers)
+
+        if critical_findings:
+            log_safety_event(
+                "CRITICAL_VALUES",
+                f"Critical biomarker values detected: {[f['biomarker'] for f in critical_findings]}",
+            )
+
         result = engine.analyze(profile_dict, biomarkers_dict)
+
+        # Inject critical value alerts into the response
+        if critical_findings:
+            result["critical_alerts"] = critical_findings
+            result["has_critical_values"] = True
+        else:
+            result["critical_alerts"] = []
+            result["has_critical_values"] = False
+
         return result
     except Exception as e:
         print(f"Analysis error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Analysis failed. Please try again.")
 
 
 # ─── 2. DIRECT CHAT INTERFACE ───────────────────────────────
@@ -81,7 +114,12 @@ def _validate_file(file: UploadFile):
     if not file.filename:
         raise HTTPException(status_code=400, detail="No filename provided.")
 
-    ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else ""
+    # Sanitize filename (prevent path traversal)
+    safe_filename = os.path.basename(file.filename)
+    if safe_filename != file.filename or '..' in file.filename:
+        raise HTTPException(status_code=400, detail="Invalid filename.")
+
+    ext = safe_filename.rsplit(".", 1)[-1].lower() if "." in safe_filename else ""
     if ext not in ALLOWED_EXTENSIONS:
         raise HTTPException(
             status_code=400,
@@ -108,6 +146,12 @@ async def upload_file(file: UploadFile = File(...)):
                 detail=f"File too large ({size_mb:.1f} MB). Maximum is {MAX_UPLOAD_SIZE_MB} MB."
             )
 
+        # ━━━ GUARDRAIL: Scan file content for safety ━━━
+        is_safe, reason = scan_file_content(content, file.filename)
+        if not is_safe:
+            log_safety_event("FILE_REJECTED", f"File '{file.filename}' rejected: {reason}")
+            raise HTTPException(status_code=400, detail=f"File rejected: {reason}")
+
         result = file_processor.process_uploaded_file(file.filename, content)
         return result
 
@@ -115,7 +159,7 @@ async def upload_file(file: UploadFile = File(...)):
         raise
     except Exception as e:
         print(f"Upload error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="File processing failed. Please try again.")
 
 
 @router.post("/upload/analyze")
@@ -134,6 +178,12 @@ async def upload_and_analyze(file: UploadFile = File(...)):
                 status_code=400,
                 detail=f"File too large ({size_mb:.1f} MB). Maximum is {MAX_UPLOAD_SIZE_MB} MB."
             )
+
+        # ━━━ GUARDRAIL: Scan file content for safety ━━━
+        is_safe, reason = scan_file_content(content, file.filename)
+        if not is_safe:
+            log_safety_event("FILE_REJECTED", f"File '{file.filename}' rejected: {reason}")
+            raise HTTPException(status_code=400, detail=f"File rejected: {reason}")
 
         # Step 1: Extract data
         upload_result = file_processor.process_uploaded_file(file.filename, content)
@@ -166,19 +216,26 @@ async def upload_and_analyze(file: UploadFile = File(...)):
                 "needs_profile": True,
             }
 
+        # ━━━ GUARDRAIL: Check for critical/panic values ━━━
+        critical_findings = check_critical_values(clean_biomarkers)
+
         analysis = engine.analyze(profile, clean_biomarkers)
 
-        return {
+        response = {
             "success": True,
             "upload_result": upload_result,
             "analysis": analysis,
+            "critical_alerts": critical_findings,
+            "has_critical_values": bool(critical_findings),
         }
+
+        return response
 
     except HTTPException:
         raise
     except Exception as e:
         print(f"Upload+Analyze error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Analysis failed. Please try again.")
 
 
 # ─── 4. CHAT WITH FILE ATTACHMENT ───────────────────────────
@@ -205,11 +262,17 @@ async def chat_with_file(
                     detail=f"File too large ({size_mb:.1f} MB). Maximum is {MAX_UPLOAD_SIZE_MB} MB."
                 )
 
+            # ━━━ GUARDRAIL: Scan file content for safety ━━━
+            is_safe, reason = scan_file_content(content, file.filename)
+            if not is_safe:
+                log_safety_event("FILE_REJECTED", f"Chat file '{file.filename}' rejected: {reason}")
+                raise HTTPException(status_code=400, detail=f"File rejected: {reason}")
+
             # Extract text from file
             filepath = file_processor.save_file(file.filename, content)
             file_text = file_processor.extract_text(filepath)
             
-            # Privacy Guard Rail: Clean up file
+            # Privacy Guard Rail: Clean up file immediately after extraction
             try:
                 if os.path.exists(filepath):
                     os.remove(filepath)
@@ -220,6 +283,11 @@ async def chat_with_file(
         except Exception as e:
             file_text = f"Error processing attached file: {str(e)}"
 
+    # Sanitize the chat message
+    message = sanitize_input(message)
+    if not message:
+        raise HTTPException(status_code=400, detail="Message cannot be empty.")
+
     try:
         result = chat_engine.chat(
             session_id=session_id,
@@ -229,7 +297,7 @@ async def chat_with_file(
         return result
     except Exception as e:
         print(f"Chat+File error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Chat processing failed. Please try again.")
 
 
 # ─── UTILITY ENDPOINTS ──────────────────────────────────────

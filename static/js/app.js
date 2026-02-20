@@ -87,6 +87,35 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ═══════════════════════════════════════════════════
+    //   SAFETY BANNER (Persistent)
+    // ═══════════════════════════════════════════════════
+    const safetyBanner = document.getElementById('safety-banner');
+    const safetyBannerClose = document.getElementById('safety-banner-close');
+    const safetyLearnMore = document.getElementById('safety-learn-more');
+
+    // Restore banner visibility from localStorage
+    if (localStorage.getItem('safety_banner_dismissed') === 'true') {
+        safetyBanner.classList.add('hidden');
+    }
+
+    if (safetyBannerClose) {
+        safetyBannerClose.addEventListener('click', () => {
+            safetyBanner.classList.add('hidden');
+            localStorage.setItem('safety_banner_dismissed', 'true');
+        });
+    }
+
+    if (safetyLearnMore) {
+        safetyLearnMore.addEventListener('click', (e) => {
+            e.preventDefault();
+            // Re-open the disclaimer modal
+            disclaimerModal.classList.add('active');
+            agreeCheckbox.checked = true;
+            acceptDisclaimerBtn.removeAttribute('disabled');
+        });
+    }
+
+    // ═══════════════════════════════════════════════════
     //   TAB NAVIGATION
     // ═══════════════════════════════════════════════════
     const tabConfig = {
@@ -264,6 +293,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('score-summary').textContent = analysis.summary || "Analysis complete.";
         document.getElementById('abnormal-count').textContent = `${score.abnormal_markers || 0} Abnormal Markers`;
         document.getElementById('risk-count').textContent = `${analysis.health_risks ? analysis.health_risks.length : 0} Risks Identified`;
+
+        // ━━━ GUARDRAIL: Render critical value alerts ━━━
+        renderCriticalAlerts(
+            data.critical_alerts,
+            'critical-alerts-section',
+            'critical-alerts-list'
+        );
 
         // Score breakdown, explanation & priority actions
         renderScoreBreakdown(score.category_scores, 'score-breakdown');
@@ -523,6 +559,44 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ═══════════════════════════════════════════════════
+    //   GUARDRAIL: CRITICAL VALUE ALERTS
+    // ═══════════════════════════════════════════════════
+    function renderCriticalAlerts(alerts, sectionId, listId) {
+        const section = document.getElementById(sectionId);
+        const list = document.getElementById(listId);
+        list.innerHTML = '';
+
+        if (!alerts || alerts.length === 0) {
+            section.classList.add('hidden');
+            return;
+        }
+
+        section.classList.remove('hidden');
+
+        alerts.forEach(alert => {
+            const div = document.createElement('div');
+            div.className = 'critical-alert-item';
+            const dirLabel = alert.direction === 'critically_high' ? '🔴 CRITICALLY HIGH' : '🔴 CRITICALLY LOW';
+            div.innerHTML = `
+                <div class="critical-alert-marker">
+                    <span class="critical-alert-name">${escHtml(alert.biomarker)}</span>
+                    <span class="critical-alert-direction">${dirLabel}</span>
+                </div>
+                <div class="critical-alert-detail">
+                    Value: <strong>${alert.value} ${escHtml(alert.unit)}</strong>
+                    &nbsp;|&nbsp; Critical threshold: ${alert.threshold} ${escHtml(alert.unit)}
+                </div>
+                <p class="critical-alert-msg">${escHtml(alert.message)}</p>`;
+            list.appendChild(div);
+        });
+
+        // Scroll to critical alerts to ensure visibility
+        setTimeout(() => {
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 300);
+    }
+
+    // ═══════════════════════════════════════════════════
     //   TAB 2: CHAT INTERFACE
     // ═══════════════════════════════════════════════════
 
@@ -570,6 +644,12 @@ document.addEventListener('DOMContentLoaded', () => {
     async function sendChatMessage() {
         const message = chatInput.value.trim();
         if (!message && !chatSelectedFile) return;
+
+        // ━━━ GUARDRAIL: Client-side input length validation ━━━
+        if (message.length > 5000) {
+            showToast('Message is too long. Please keep it under 5,000 characters.', 'error');
+            return;
+        }
 
         // Remove welcome screen
         const welcome = chatMessages.querySelector('.chat-welcome');
@@ -967,6 +1047,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     healthScore > 40 ? "Needs Attention" : "High Risk Indicators";
 
         document.getElementById('upload-score-summary').textContent = analysis.summary || "Analysis complete.";
+
+        // ━━━ GUARDRAIL: Render critical value alerts (Upload) ━━━
+        renderCriticalAlerts(
+            data.critical_alerts,
+            'upload-critical-alerts-section',
+            'upload-critical-alerts-list'
+        );
 
         renderScoreBreakdown(score.category_scores, 'upload-score-breakdown');
         renderScoreExplanation(analysis.score_explanation, 'upload-score-interpretation', 'upload-score-top-contributors');

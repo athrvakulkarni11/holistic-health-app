@@ -75,6 +75,18 @@
             </header>
 
             <div class="content-scroll">
+                <!-- Persistent Safety Banner -->
+                <div class="safety-banner" id="safety-banner">
+                    <div class="safety-banner-content">
+                        <i class="fa-solid fa-shield-heart"></i>
+                        <span><strong>AI Health Tool</strong> — For informational purposes only. Not a substitute for
+                            professional medical advice. <a href="#" id="safety-learn-more">Learn more</a></span>
+                        <button class="safety-banner-close" id="safety-banner-close" title="Dismiss">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+
                 <!-- ═══════════════════════════════════════════════
                      TAB 1: BIOMARKER FORM
                      ═══════════════════════════════════════════════ -->
@@ -236,6 +248,19 @@
 
                     <!-- Results Section -->
                     <section id="results-section" class="hidden fade-in">
+                        <!-- Critical Value Alert (Guardrail) -->
+                        <div id="critical-alerts-section" class="critical-alerts-banner hidden">
+                            <div class="critical-alert-header">
+                                <i class="fa-solid fa-exclamation-triangle"></i>
+                                <h3>⚠️ Critical Values Detected — Seek Immediate Medical Attention</h3>
+                            </div>
+                            <div id="critical-alerts-list" class="critical-alerts-list"></div>
+                            <p class="critical-alert-footer">
+                                <strong>These values are outside safe ranges.</strong> Please contact your healthcare
+                                provider or visit an emergency room immediately.
+                            </p>
+                        </div>
+
                         <div class="hero-score glass-card">
                             <div class="score-circle-container">
                                 <svg class="score-ring" width="160" height="160">
@@ -516,6 +541,19 @@
                                     <h2 id="upload-score-level">--</h2>
                                     <p id="upload-score-summary">Analysis pending...</p>
                                 </div>
+                            </div>
+
+                            <!-- Critical Value Alert (Upload Guardrail) -->
+                            <div id="upload-critical-alerts-section" class="critical-alerts-banner hidden">
+                                <div class="critical-alert-header">
+                                    <i class="fa-solid fa-exclamation-triangle"></i>
+                                    <h3>⚠️ Critical Values Detected — Seek Immediate Medical Attention</h3>
+                                </div>
+                                <div id="upload-critical-alerts-list" class="critical-alerts-list"></div>
+                                <p class="critical-alert-footer">
+                                    <strong>These values are outside safe ranges.</strong> Please contact your
+                                    healthcare provider or visit an emergency room immediately.
+                                </p>
                             </div>
 
                             <!-- Score Breakdown (Upload) -->

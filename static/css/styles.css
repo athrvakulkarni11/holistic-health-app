@@ -1985,3 +1985,192 @@ textarea::placeholder {
     cursor: not-allowed;
     filter: grayscale(1);
 }
+
+/* ═══════════════════════════════════════════════════════════
+   SAFETY BANNER (Persistent top-line reminder)
+   ═══════════════════════════════════════════════════════════ */
+.safety-banner {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(239, 68, 68, 0.08));
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: var(--radius-md);
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1.5rem;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.safety-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.safety-banner-content i {
+    font-size: 1.1rem;
+    color: var(--warning);
+    flex-shrink: 0;
+}
+
+.safety-banner-content strong {
+    color: var(--text-main);
+}
+
+.safety-banner-content a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.safety-banner-content a:hover {
+    text-decoration: underline;
+}
+
+.safety-banner-close {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    padding: 0.25rem;
+    margin-left: auto;
+    flex-shrink: 0;
+    transition: var(--transition);
+    font-size: 0.9rem;
+}
+
+.safety-banner-close:hover {
+    color: var(--text-main);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CRITICAL VALUE ALERTS (Guardrail)
+   ═══════════════════════════════════════════════════════════ */
+.critical-alerts-banner {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.1));
+    border: 2px solid rgba(239, 68, 68, 0.4);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    animation: criticalPulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes criticalPulse {
+    0% {
+        border-color: rgba(239, 68, 68, 0.4);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+
+    100% {
+        border-color: rgba(239, 68, 68, 0.7);
+        box-shadow: 0 0 20px rgba(239, 68, 68, 0.15);
+    }
+}
+
+.critical-alert-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.critical-alert-header i {
+    font-size: 1.5rem;
+    color: var(--danger);
+    animation: warningShake 0.5s ease-in-out;
+}
+
+@keyframes warningShake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    20% {
+        transform: translateX(-3px) rotate(-2deg);
+    }
+
+    40% {
+        transform: translateX(3px) rotate(2deg);
+    }
+
+    60% {
+        transform: translateX(-2px) rotate(-1deg);
+    }
+
+    80% {
+        transform: translateX(2px) rotate(1deg);
+    }
+}
+
+.critical-alert-header h3 {
+    color: var(--danger);
+    font-size: 1.05rem;
+    margin: 0;
+}
+
+.critical-alerts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.critical-alert-item {
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: var(--radius-sm);
+    padding: 1rem;
+    border-left: 4px solid var(--danger);
+}
+
+.critical-alert-marker {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.critical-alert-name {
+    font-weight: 700;
+    color: var(--text-main);
+    font-size: 0.95rem;
+    text-transform: capitalize;
+}
+
+.critical-alert-direction {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    background: rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
+    letter-spacing: 0.05em;
+}
+
+.critical-alert-detail {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.critical-alert-detail strong {
+    color: var(--text-main);
+}
+
+.critical-alert-msg {
+    font-size: 0.8rem;
+    color: var(--warning);
+    margin: 0;
+    font-weight: 500;
+}
+
+.critical-alert-footer {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: #fca5a5;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.critical-alert-footer strong {
+    color: var(--danger);
+}
