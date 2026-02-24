@@ -382,10 +382,8 @@ CRITICAL RULES FOR MEDICAL ACCURACY:
 4. When values suggest a condition, NAME the condition explicitly.
 
 SUPPLEMENT DOSAGE RULES:
-- For Vitamin D deficiency (<20 ng/mL): Loading dose of 60,000 IU weekly for 8 weeks, then maintenance dose of 1,000-2,000 IU daily. DO NOT suggest just 1,000-2,000 IU daily for severe deficiency.
-- For Vitamin B12 deficiency (<200 pg/mL): Methylcobalamin 1,500 mcg daily for 3 months, NOT the 2.4 mcg RDA.
-- For Iron deficiency (low ferritin + low iron): Ferrous sulfate 325mg daily with Vitamin C for absorption.
-- Give TREATMENT doses based on the specific deficiency severity, NOT generic daily recommended allowances.
+- DO NOT suggest direct medicine or supplement quantities or dosages to the user.
+- Recommend the name of the supplement or treatment needed based on the deficiency, but explicitly advise the user to consult a healthcare provider for the appropriate dosage.
 
 THYROID LANGUAGE RULES:
 - For subclinical hypothyroidism (TSH 4-10, normal FT4): Recommend "monitoring and evaluation" NOT "starting thyroid replacement therapy"
@@ -427,7 +425,7 @@ Respond ONLY with valid JSON in this EXACT structure:
   "priority_actions": [
     {
       "priority": 1,
-      "action": "Clear, specific action with dosages if applicable",
+      "action": "Clear, specific action (DO NOT provide exact dosages)",
       "category": "deficiency/metabolic/cardiovascular/hormonal/inflammation/monitoring",
       "urgency": "immediate/within_2_weeks/within_1_month/within_3_months",
       "rationale": "Why this is prioritized at this level"
@@ -450,7 +448,7 @@ Respond ONLY with valid JSON in this EXACT structure:
   "supplement_suggestions": [
     {
       "supplement": "Name",
-      "dosage": "EXACT TREATMENT dosage (e.g., '60,000 IU weekly for 8 weeks, then 1,000 IU daily maintenance')",
+      "dosage": "State 'Consult provider for dosage' (Do NOT suggest direct quantity)",
       "reason": "Why suggested, referencing the specific abnormal value",
       "duration": "How long to take it before retest",
       "caution": "Any warnings or interactions"
@@ -482,6 +480,7 @@ Respond ONLY with valid JSON in this EXACT structure:
 **Patient Profile:**
 - Age: {user_profile.get('age', 'Not provided')} years
 - Gender: {user_profile.get('gender', 'Not provided')}
+- Diet Preference: {user_profile.get('diet_preference', 'Not provided')}
 - Height: {user_profile.get('height', 'Not provided')} cm
 - Weight: {user_profile.get('weight', 'Not provided')} kg
 
@@ -507,10 +506,7 @@ Abnormal markers: {risk_score['abnormal_markers']} out of {risk_score['total_mar
 IMPORTANT INSTRUCTIONS:
 1. Do NOT skip any abnormal biomarker. Every HIGH or LOW marker MUST be addressed in key_findings.
 2. Use PRECISE medical terminology (prediabetes vs diabetes, subclinical vs overt hypothyroidism).
-3. For supplement_suggestions: give TREATMENT-LEVEL dosages based on deficiency severity. Do NOT use RDA values.
-   - Vitamin D severe deficiency: 60,000 IU/week loading, then 1000 IU/day maintenance
-   - Vitamin B12 deficiency: 1500 mcg/day methylcobalamin, NOT 2.4 mcg RDA
-   - Iron deficiency: Ferrous sulfate 325mg/day with Vitamin C
+3. For supplement_suggestions and priority_actions: DO NOT suggest direct medicine quantities or dosages. Tell the user to consult their healthcare provider for appropriate dosage. Also, tailor dietary_recommendations strictly according to the Patient Profile's Diet Preference (e.g., if veg, give vegetarian food sources only; if non-veg, include meat/fish options).
 4. For thyroid: if TSH is mildly elevated with normal T4/T3, recommend "monitoring and evaluation" not "starting replacement therapy."
 5. In priority_actions, order from most urgent to least. Number them 1, 2, 3, etc.
 6. In score_explanation, explain what the health score of {health_score}/100 means and which categories contribute most to reducing it.

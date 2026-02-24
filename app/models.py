@@ -8,6 +8,7 @@ from typing import Optional
 class UserProfile(BaseModel):
     age: int = Field(..., ge=1, le=120, description="Patient age in years")
     gender: str = Field(..., pattern="^(male|female|Male|Female|M|F|m|f)$", description="Patient gender")
+    diet_preference: Optional[str] = Field(None, description="Patient's dietary preference (e.g., veg, non-veg)")
     height: Optional[float] = Field(None, ge=50, le=300, description="Height in cm")
     weight: Optional[float] = Field(None, ge=20, le=500, description="Weight in kg")
 

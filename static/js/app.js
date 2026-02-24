@@ -198,6 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
             profile: {
                 age: parseInt(formData.get('age')),
                 gender: formData.get('gender'),
+                diet_preference: formData.get('diet_preference') || null,
                 height: parseFloat(formData.get('height')) || null,
                 weight: parseFloat(formData.get('weight')) || null
             },
@@ -991,6 +992,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Get profile
         const age = parseInt(document.getElementById('upload-age').value);
         const gender = document.getElementById('upload-gender').value;
+        const dietPreference = document.getElementById('upload-diet-preference').value;
 
         if (!age || !gender) {
             showToast('Please provide Age and Gender to run analysis.', 'error');
@@ -1004,6 +1006,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 profile: {
                     age: age,
                     gender: gender,
+                    diet_preference: dietPreference || null,
                     height: null,
                     weight: null,
                 },
