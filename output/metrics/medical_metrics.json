@@ -1,0 +1,14 @@
+{
+    "blood_pressure": "140/90 mmHg",
+    "heart_rate": "78 bpm",
+    "risk_factors": [
+        "Hypertension",
+        "Diabetes Type 2",
+        "Hypertension (Family History)",
+        "Diabetes (Family History)"
+    ],
+    "key_findings": [
+        "Elevated blood glucose levels (HbA1c: 7.8%)",
+        "Overweight (BMI: 27.5)"
+    ]
+}
