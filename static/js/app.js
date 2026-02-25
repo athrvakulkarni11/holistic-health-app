@@ -307,14 +307,26 @@ document.addEventListener('DOMContentLoaded', () => {
         renderScoreExplanation(analysis.score_explanation, 'score-interpretation', 'score-top-contributors');
         renderPriorityActions(analysis.priority_actions, 'priority-actions-list');
 
+        // Interaction modifiers
+        renderInteractionModifiers(
+            score.triggered_interactions,
+            'interaction-modifiers-section',
+            'interaction-modifiers-list'
+        );
+
         renderFindings('key-findings-list', analysis.key_findings);
         renderRisks('health-risks-list', analysis.health_risks);
+
+        // Recommendations (tabbed)
+        renderActivityRecommendations('activity-list', analysis.activity_recommendations);
         renderList('nutrition-list', analysis.dietary_recommendations, item =>
             `<strong>${item.category}:</strong> ${item.items.join(', ')} -- ${item.reason}`);
-        renderList('lifestyle-list', analysis.lifestyle_recommendations, item =>
-            `<strong>${item.priority ? item.priority.toUpperCase() : 'ADVICE'}:</strong> ${item.recommendation}`);
         renderList('supplements-list', analysis.supplement_suggestions, item =>
             `<strong>${item.supplement}:</strong> ${item.dosage}${item.duration ? ' (' + item.duration + ')' : ''} -- ${item.reason}`);
+        renderList('lifestyle-list', analysis.lifestyle_recommendations, item =>
+            `<strong>${item.priority ? item.priority.toUpperCase() : 'ADVICE'}:</strong> ${item.recommendation}`);
+        renderAlternateHealing('alternate-healing-list', analysis.alternate_healing_recommendations);
+
         renderFollowUp('follow-up-list', analysis.follow_up_tests);
         renderPositiveFindings(analysis.positive_findings, 'positive-findings-section', 'positive-findings-list');
         renderWebSources(data.web_sources, 'web-sources-section', 'web-sources-list');
@@ -376,7 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ─── Score Breakdown (Category Bars) ─────────
+    // ─── Score Breakdown (Donut Chart + Category Bars) ─────────
     // health_score: 100 = healthy, 0 = critical
     function renderScoreBreakdown(categoryScores, containerId) {
         const el = document.getElementById(containerId);
@@ -386,17 +398,48 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Determine chart canvas + legend IDs based on container
+        const isUpload = containerId.startsWith('upload-');
+        const canvasId = isUpload ? 'upload-score-donut-chart' : 'score-donut-chart';
+        const legendId = isUpload ? 'upload-score-donut-legend' : 'score-donut-legend';
+
         // Sort by health_score ascending (worst categories first)
         const sorted = Object.entries(categoryScores)
             .sort(([, a], [, b]) => a.health_score - b.health_score);
 
+        // ─── Draw Donut Chart ───
+        const chartColors = {
+            excellent: '#10b981',  // green
+            good: '#34d399',
+            mild: '#f59e0b',      // yellow/amber
+            attention: '#f97316', // orange
+            risk: '#ef4444',      // red
+        };
+
+        const segments = sorted.map(([catKey, cs]) => {
+            const hs = cs.health_score;
+            const color = hs >= 80 ? chartColors.excellent :
+                hs >= 55 ? chartColors.mild :
+                    hs >= 30 ? chartColors.attention : chartColors.risk;
+            return {
+                label: cs.label,
+                value: Math.max(cs.total_markers, 1), // Weight by number of markers
+                healthScore: hs,
+                color: color,
+                icon: cs.icon,
+                abnormal: cs.abnormal_markers,
+                total: cs.total_markers,
+            };
+        });
+
+        drawDonutChart(canvasId, legendId, segments);
+
+        // ─── Detail Bars ───
         sorted.forEach(([catKey, cs]) => {
             const hs = cs.health_score;
-            // Colors: green = healthy (high score), red = critical (low score)
             const colorClass = hs >= 80 ? 'green' : hs >= 55 ? 'yellow' : hs >= 30 ? 'orange' : 'red';
             const colorVal = hs >= 80 ? 'var(--success)' : hs >= 55 ? 'var(--warning)' : hs >= 30 ? '#f97316' : 'var(--danger)';
 
-            // Status badge
             const statusLabel = cs.status_label || (hs >= 90 ? 'Healthy' : hs >= 70 ? 'Mild Concern' : hs >= 40 ? 'Needs Attention' : 'High Risk');
             const statusClass = hs >= 90 ? 'healthy' : hs >= 70 ? 'concern' : hs >= 40 ? 'attention' : 'risk';
 
@@ -427,6 +470,119 @@ document.addEventListener('DOMContentLoaded', () => {
                 bar.style.width = bar.getAttribute('data-width') + '%';
             });
         }, 200);
+    }
+
+    // ─── Donut Chart Drawing ────────────────────────
+    function drawDonutChart(canvasId, legendId, segments) {
+        const canvas = document.getElementById(canvasId);
+        const legendEl = document.getElementById(legendId);
+        if (!canvas || !legendEl) return;
+
+        const ctx = canvas.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+        const displaySize = 280;
+
+        canvas.width = displaySize * dpr;
+        canvas.height = displaySize * dpr;
+        canvas.style.width = displaySize + 'px';
+        canvas.style.height = displaySize + 'px';
+        ctx.scale(dpr, dpr);
+
+        const centerX = displaySize / 2;
+        const centerY = displaySize / 2;
+        const outerRadius = 115;
+        const innerRadius = 75;
+
+        const totalValue = segments.reduce((sum, s) => sum + s.value, 0);
+        if (totalValue === 0) return;
+
+        // Animate the chart
+        const animDuration = 1200;
+        const startTime = performance.now();
+
+        function animateChart(now) {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / animDuration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+
+            ctx.clearRect(0, 0, displaySize, displaySize);
+
+            // Background ring
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, outerRadius, 0, Math.PI * 2);
+            ctx.arc(centerX, centerY, innerRadius, 0, Math.PI * 2, true);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+            ctx.fill();
+
+            let currentAngle = -Math.PI / 2; // Start from top
+            const gapAngle = 0.03; // Small gap between segments
+
+            segments.forEach((seg, i) => {
+                const sliceAngle = ((seg.value / totalValue) * Math.PI * 2 - gapAngle) * eased;
+                if (sliceAngle <= 0) return;
+
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, outerRadius, currentAngle, currentAngle + sliceAngle);
+                ctx.arc(centerX, centerY, innerRadius, currentAngle + sliceAngle, currentAngle, true);
+                ctx.closePath();
+
+                // Gradient fill for depth
+                const gradient = ctx.createRadialGradient(centerX, centerY, innerRadius, centerX, centerY, outerRadius);
+                gradient.addColorStop(0, seg.color + 'CC');
+                gradient.addColorStop(1, seg.color);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+
+                // Subtle glow
+                ctx.shadowColor = seg.color;
+                ctx.shadowBlur = 8;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                currentAngle += sliceAngle + gapAngle * eased;
+            });
+
+            // Center circle (background)
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, innerRadius - 4, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(15, 20, 35, 0.95)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Center text — overall average health score
+            const avgHealth = Math.round(segments.reduce((sum, s) => sum + s.healthScore * s.value, 0) / totalValue);
+            const displayScore = Math.round(avgHealth * eased);
+
+            ctx.fillStyle = displayScore >= 70 ? '#10b981' : displayScore >= 40 ? '#f59e0b' : '#ef4444';
+            ctx.font = `bold ${32}px 'Outfit', sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(displayScore, centerX, centerY - 8);
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.font = `500 ${11}px 'Outfit', sans-serif`;
+            ctx.fillText('AVG HEALTH', centerX, centerY + 16);
+
+            if (progress < 1) {
+                requestAnimationFrame(animateChart);
+            }
+        }
+
+        requestAnimationFrame(animateChart);
+
+        // Legend
+        legendEl.innerHTML = '';
+        segments.forEach(seg => {
+            const item = document.createElement('div');
+            item.className = 'donut-legend-item';
+            item.innerHTML = `
+                <span class="donut-legend-color" style="background:${seg.color};"></span>
+                <span class="donut-legend-label">${seg.label}</span>
+                <span class="donut-legend-value" style="color:${seg.color};">${seg.healthScore}/100</span>`;
+            legendEl.appendChild(item);
+        });
     }
 
     // ─── Score Explanation (LLM Interpretation) ──
@@ -558,6 +714,116 @@ document.addEventListener('DOMContentLoaded', () => {
             list.appendChild(li);
         });
     }
+
+    // ═══════════════════════════════════════════════════
+    //   INTERACTION MODIFIERS RENDERER
+    // ═══════════════════════════════════════════════════
+    function renderInteractionModifiers(interactions, sectionId, listId) {
+        const section = document.getElementById(sectionId);
+        const list = document.getElementById(listId);
+        list.innerHTML = '';
+
+        if (!interactions || interactions.length === 0) {
+            section.classList.add('hidden');
+            return;
+        }
+
+        section.classList.remove('hidden');
+        interactions.forEach(ix => {
+            const priorityClass = ix.priority === 1 ? 'p1' : ix.priority === 2 ? 'p2' : 'p3';
+            const div = document.createElement('div');
+            div.className = 'interaction-modifier-item';
+            div.innerHTML = `
+                <div class="interaction-modifier-header">
+                    <span class="interaction-modifier-name">${escHtml(ix.name)}</span>
+                    <span class="interaction-modifier-score">${ix.score_modifier} pts</span>
+                </div>
+                <p class="interaction-modifier-desc">${escHtml(ix.description)}</p>
+                ${ix.clinical_significance ? `<p class="interaction-modifier-significance">${escHtml(ix.clinical_significance)}</p>` : ''}
+                <div class="interaction-modifier-meta">
+                    <span class="interaction-priority-badge ${priorityClass}">Priority ${ix.priority}</span>
+                    ${ix.affected_cluster ? `<span class="category-badge">${ix.affected_cluster}</span>` : ''}
+                </div>`;
+            list.appendChild(div);
+        });
+    }
+
+    // ═══════════════════════════════════════════════════
+    //   ACTIVITY RECOMMENDATIONS RENDERER
+    // ═══════════════════════════════════════════════════
+    function renderActivityRecommendations(elementId, activities) {
+        const el = document.getElementById(elementId);
+        el.innerHTML = '';
+        if (!activities || activities.length === 0) {
+            el.innerHTML = '<p style="color:var(--text-dim); padding: 0.5rem;">No activity recommendations available.</p>';
+            return;
+        }
+
+        activities.forEach(a => {
+            const intensityClass = (a.intensity || 'moderate').toLowerCase();
+            const div = document.createElement('div');
+            div.className = 'activity-item';
+            div.innerHTML = `
+                <div class="activity-item-header">
+                    <span class="activity-item-text">${escHtml(a.recommendation || '')}</span>
+                    <span class="activity-intensity ${intensityClass}">${escHtml(a.intensity || 'Moderate')}</span>
+                </div>
+                <div class="activity-meta">
+                    ${a.frequency ? `<span><i class="fa-regular fa-clock"></i> ${escHtml(a.frequency)}</span>` : ''}
+                    ${a.reason ? `<span><i class="fa-solid fa-bullseye"></i> ${escHtml(a.reason)}</span>` : ''}
+                </div>
+                ${a.precaution ? `<div class="activity-precaution"><i class="fa-solid fa-triangle-exclamation"></i> ${escHtml(a.precaution)}</div>` : ''}`;
+            el.appendChild(div);
+        });
+    }
+
+    // ═══════════════════════════════════════════════════
+    //   ALTERNATE HEALING RENDERER
+    // ═══════════════════════════════════════════════════
+    function renderAlternateHealing(elementId, items) {
+        const el = document.getElementById(elementId);
+        el.innerHTML = '';
+        if (!items || items.length === 0) {
+            el.innerHTML = '<p style="color:var(--text-dim); padding: 0.5rem;">No alternate healing recommendations available.</p>';
+            return;
+        }
+
+        items.forEach(h => {
+            const div = document.createElement('div');
+            div.className = 'healing-item';
+            div.innerHTML = `
+                <div class="healing-item-header">
+                    <span class="healing-item-name">${escHtml(h.recommendation || '')}</span>
+                    <span class="healing-system-badge">${escHtml(h.system || 'Traditional')}</span>
+                </div>
+                <p class="healing-description">${escHtml(h.description || '')}</p>
+                ${h.target_condition ? `<div class="healing-target"><i class="fa-solid fa-crosshairs"></i> ${escHtml(h.target_condition)}</div>` : ''}
+                ${h.caution ? `<div class="healing-caution"><i class="fa-solid fa-triangle-exclamation"></i> ${escHtml(h.caution)}</div>` : ''}`;
+            el.appendChild(div);
+        });
+    }
+
+    // ═══════════════════════════════════════════════════
+    //   RECOMMENDATION SUB-TAB SWITCHING
+    // ═══════════════════════════════════════════════════
+    document.addEventListener('click', (e) => {
+        const tab = e.target.closest('.rec-tab');
+        if (!tab) return;
+
+        // Find the parent recommendations-panel
+        const panel = tab.closest('.recommendations-panel');
+        if (!panel) return;
+
+        // Deactivate all tabs and content within this panel
+        panel.querySelectorAll('.rec-tab').forEach(t => t.classList.remove('active'));
+        panel.querySelectorAll('.rec-tab-content').forEach(c => c.classList.remove('active'));
+
+        // Activate clicked tab and its content
+        tab.classList.add('active');
+        const targetId = tab.getAttribute('data-rec-target');
+        const targetContent = document.getElementById(targetId);
+        if (targetContent) targetContent.classList.add('active');
+    });
 
     // ═══════════════════════════════════════════════════
     //   GUARDRAIL: CRITICAL VALUE ALERTS
@@ -1062,14 +1328,26 @@ document.addEventListener('DOMContentLoaded', () => {
         renderScoreExplanation(analysis.score_explanation, 'upload-score-interpretation', 'upload-score-top-contributors');
         renderPriorityActions(analysis.priority_actions, 'upload-priority-actions');
 
+        // Interaction modifiers (Upload)
+        renderInteractionModifiers(
+            score.triggered_interactions,
+            'upload-interaction-section',
+            'upload-interaction-list'
+        );
+
         renderFindings('upload-key-findings', analysis.key_findings);
         renderRisks('upload-health-risks', analysis.health_risks);
+
+        // Recommendations (tabbed)
+        renderActivityRecommendations('upload-activity', analysis.activity_recommendations);
         renderList('upload-nutrition', analysis.dietary_recommendations, item =>
             `<strong>${item.category}:</strong> ${item.items.join(', ')} -- ${item.reason}`);
-        renderList('upload-lifestyle', analysis.lifestyle_recommendations, item =>
-            `<strong>${item.priority ? item.priority.toUpperCase() : 'ADVICE'}:</strong> ${item.recommendation}`);
         renderList('upload-supplements', analysis.supplement_suggestions, item =>
             `<strong>${item.supplement}:</strong> ${item.dosage}${item.duration ? ' (' + item.duration + ')' : ''} -- ${item.reason}`);
+        renderList('upload-lifestyle', analysis.lifestyle_recommendations, item =>
+            `<strong>${item.priority ? item.priority.toUpperCase() : 'ADVICE'}:</strong> ${item.recommendation}`);
+        renderAlternateHealing('upload-alternate-healing', analysis.alternate_healing_recommendations);
+
         renderPositiveFindings(analysis.positive_findings, 'upload-positive-section', 'upload-positive-list');
         renderWebSources(data.web_sources, 'upload-sources-section', 'upload-sources-list');
     }

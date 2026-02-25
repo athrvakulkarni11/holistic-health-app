@@ -1,0 +1,784 @@
+{
+    "interaction_modifiers": [
+        {
+            "id": "IDA_PATTERN",
+            "name": "Iron-Deficiency Anemia Pattern",
+            "description": "Low hemoglobin combined with low ferritin strongly suggests iron-deficiency anemia. The combination is more significant than either marker alone.",
+            "conditions": [
+                {
+                    "biomarker": "hemoglobin",
+                    "status": "low"
+                },
+                {
+                    "biomarker": "ferritin",
+                    "status": "low"
+                }
+            ],
+            "operator": "AND",
+            "score_modifier": -10,
+            "affected_cluster": "blood_health",
+            "priority": 1,
+            "clinical_significance": "Confirms iron-deficiency as the cause of anemia rather than other etiologies. Requires iron supplementation and dietary intervention.",
+            "triggered_recommendations": {
+                "activity": [
+                    "Light to moderate exercise only until Hb improves above 10 g/dL",
+                    "Avoid high-intensity exercise which increases iron demand"
+                ],
+                "nutrition": [
+                    "Iron-rich foods: spinach, lentils, tofu, dark chocolate",
+                    "Pair iron foods with Vitamin C (lemon, orange) to boost absorption",
+                    "Avoid tea/coffee within 1 hour of iron-rich meals"
+                ],
+                "supplementation": [
+                    "Iron supplement (consult provider for dosage)",
+                    "Vitamin C to enhance absorption"
+                ],
+                "lifestyle": [
+                    "Monitor energy levels daily",
+                    "Prioritize 8+ hours of sleep for recovery",
+                    "Avoid blood donation"
+                ],
+                "alternate_healing": [
+                    "Ayurvedic: Punarnava (Boerhavia diffusa) for blood building",
+                    "Ayurvedic: Loha Bhasma (iron ash) under practitioner guidance",
+                    "Yoga: Gentle pranayama (Anulom Vilom) for oxygenation"
+                ]
+            }
+        },
+        {
+            "id": "B12_ANEMIA_PATTERN",
+            "name": "Vitamin B12 Deficiency Anemia Pattern",
+            "description": "Low hemoglobin with low Vitamin B12 suggests megaloblastic anemia. Different treatment pathway than iron-deficiency anemia.",
+            "conditions": [
+                {
+                    "biomarker": "hemoglobin",
+                    "status": "low"
+                },
+                {
+                    "biomarker": "vitamin_b12",
+                    "status": "low"
+                }
+            ],
+            "operator": "AND",
+            "score_modifier": -8,
+            "affected_cluster": "blood_health",
+            "priority": 1,
+            "clinical_significance": "Megaloblastic anemia pattern. B12 deficiency affects both blood cell production and neurological function.",
+            "triggered_recommendations": {
+                "activity": [
+                    "Moderate walking 20-30 mins daily",
+                    "Balance exercises to counteract B12-related neuropathy risk"
+                ],
+                "nutrition": [
+                    "B12-rich foods: fortified cereals, dairy, eggs",
+                    "For vegans: fortified nutritional yeast, plant milks",
+                    "Fermented foods for gut B12 absorption"
+                ],
+                "supplementation": [
+                    "Vitamin B12 (consult provider; sublingual or injection may be needed)",
+                    "Folate as co-factor"
+                ],
+                "lifestyle": [
+                    "Regular neurological symptom monitoring (tingling, numbness)",
+                    "Stress management as stress depletes B12"
+                ],
+                "alternate_healing": [
+                    "Ayurvedic: Ashwagandha for nerve health support",
+                    "Ayurvedic: Brahmi (Bacopa monnieri) for cognitive support",
+                    "Yoga: Sarvangasana (shoulder stand) for thyroid and circulation"
+                ]
+            }
+        },
+        {
+            "id": "METABOLIC_SYNDROME_PATTERN",
+            "name": "Metabolic Syndrome Pattern",
+            "description": "High fasting glucose + high triglycerides + low HDL indicates metabolic syndrome, a cluster of conditions that significantly increase cardiovascular risk.",
+            "conditions": [
+                {
+                    "biomarker": "fasting_glucose",
+                    "status": "high"
+                },
+                {
+                    "biomarker": "triglycerides",
+                    "status": "high"
+                },
+                {
+                    "biomarker": "hdl",
+                    "status": "low"
+                }
+            ],
+            "operator": "AND",
+            "score_modifier": -15,
+            "affected_cluster": "metabolic",
+            "priority": 1,
+            "clinical_significance": "Metabolic syndrome diagnosis requires 3 of 5 criteria. This biomarker combination alone confirms 3 criteria and warrants immediate intervention.",
+            "triggered_recommendations": {
+                "activity": [
+                    "Aerobic exercise 150 min/week minimum (brisk walking, swimming, cycling)",
+                    "Resistance training 2-3 times/week for insulin sensitivity",
+                    "Post-meal walking 10-15 mins to blunt glucose spikes"
+                ],
+                "nutrition": [
+                    "Mediterranean diet pattern",
+                    "Limit refined carbs and added sugars",
+                    "Increase soluble fiber (oats, beans, flaxseed)",
+                    "Omega-3 rich foods (salmon, walnuts, chia seeds)",
+                    "Portion control — caloric deficit if overweight"
+                ],
+                "supplementation": [
+                    "Omega-3 fatty acids (consult provider for dosage)",
+                    "Berberine (consult provider — natural glucose-lowering)",
+                    "Chromium picolinate (consult provider — insulin sensitivity)"
+                ],
+                "lifestyle": [
+                    "Weight loss target: 5-7% of body weight",
+                    "Sleep optimization: 7-9 hours, consistent schedule",
+                    "Stress reduction: cortisol drives insulin resistance",
+                    "Blood sugar monitoring at home"
+                ],
+                "alternate_healing": [
+                    "Ayurvedic: Gymnema Sylvestre (Gurmar) — reduces sugar cravings",
+                    "Ayurvedic: Fenugreek (Methi) seeds soaked overnight",
+                    "Ayurvedic: Triphala for digestive metabolism",
+                    "Yoga: Surya Namaskar (Sun Salutation) for full-body metabolism",
+                    "Yoga: Kapalbhati Pranayama for abdominal organs"
+                ]
+            }
+        },
+        {
+            "id": "PREDIABETES_CONFIRMATION",
+            "name": "Prediabetes Confirmation Pattern",
+            "description": "Both fasting glucose (100-125) and HbA1c (5.7-6.4%) being elevated confirms prediabetes per ADA criteria.",
+            "conditions": [
+                {
+                    "biomarker": "fasting_glucose",
+                    "status": "high"
+                },
+                {
+                    "biomarker": "hba1c",
+                    "status": "high"
+                }
+            ],
+            "operator": "AND",
+            "score_modifier": -10,
+            "affected_cluster": "metabolic",
+            "priority": 1,
+            "clinical_significance": "Dual-marker confirmation of prediabetes. Higher conversion risk to Type 2 Diabetes than single-marker elevation.",
+            "triggered_recommendations": {
+                "activity": [
+                    "Structured exercise program: 150 min moderate-intensity/week",
+                    "Include both cardio and strength training",
+                    "Walking after every major meal (10-15 mins)"
+                ],
+                "nutrition": [
+                    "Low glycemic index diet",
+                    "Increase fiber to 25-30g/day",
+                    "Cinnamon in meals (natural insulin sensitizer)",
+                    "Apple cider vinegar before meals",
+                    "Limit fruit juices and refined carbs"
+                ],
+                "supplementation": [
+                    "Chromium (consult provider for dosage)",
+                    "Alpha-lipoic acid (consult provider)",
+                    "Berberine (consult provider — evidence-based glucose lowering)"
+                ],
+                "lifestyle": [
+                    "Weight management plan with 5-7% body weight loss goal",
+                    "Sleep hygiene: consistent schedule, 7-9 hours",
+                    "Stress management: elevated cortisol worsens insulin resistance",
+                    "Regular glucose monitoring"
+                ],
+                "alternate_healing": [
+                    "Ayurvedic: Bitter gourd (Karela) juice on empty stomach",
+                    "Ayurvedic: Jamun (Indian Blackberry) seed powder",
+                    "Ayurvedic: Vijaysar (Pterocarpus marsupium) bark water",
+                    "Yoga: Mandukasana (Frog pose) for pancreatic stimulation",
+                    "Yoga: Ardha Matsyendrasana (spinal twist) for abdominal organs"
+                ]
+            }
+        },
+        {
+            "id": "CARDIOVASCULAR_RISK_PATTERN",
+            "name": "Cardiovascular Risk Pattern",
+            "description": "High LDL + low HDL + elevated hs-CRP indicates combined dyslipidemia with active inflammation — a high-risk pattern for cardiovascular events.",
+            "conditions": [
+                {
+                    "biomarker": "ldl",
+                    "status": "high"
+                },
+                {
+                    "biomarker": "hdl",
+                    "status": "low"
+                },
+                {
+                    "biomarker": "hs_crp",
+                    "status": "high"
+                }
+            ],
+            "operator": "AND",
+            "score_modifier": -12,
+            "affected_cluster": "lipids",
+            "priority": 1,
+            "clinical_significance": "Triple threat: atherogenic lipid profile plus vascular inflammation. Aggressive intervention warranted.",
+            "triggered_recommendations": {
+                "activity": [
+                    "Cardiovascular exercise 30-60 mins, 5 days/week",
+                    "Brisk walking, swimming, or cycling preferred",
+                    "Avoid isometric/heavy lifting until lipids improve"
+                ],
+                "nutrition": [
+                    "DASH or Mediterranean diet",
+                    "Soluble fiber: oats, barley, beans, apples",
+                    "Plant sterols and stanols (fortified foods)",
+                    "Omega-3 fatty acids: salmon, sardines, mackerel",
+                    "Anti-inflammatory foods: turmeric, ginger, berries",
+                    "Avoid trans fats and limit saturated fats"
+                ],
+                "supplementation": [
+                    "Omega-3 fish oil (consult provider for dosage)",
+                    "CoQ10 (consult provider — especially if on statins)",
+                    "Plant sterol supplements (consult provider)"
+                ],
+                "lifestyle": [
+                    "Smoking cessation if applicable",
+                    "Limit alcohol to moderate levels",
+                    "Weight management",
+                    "Stress reduction (chronic stress raises CRP)"
+                ],
+                "alternate_healing": [
+                    "Ayurvedic: Arjuna (Terminalia arjuna) bark — cardioprotective",
+                    "Ayurvedic: Guggul (Commiphora mukul) for lipid management",
+                    "Ayurvedic: Garlic (Lasuna) for cholesterol",
+                    "Yoga: Shavasana (Corpse pose) for deep relaxation",
+                    "Yoga: Bhramari Pranayama for blood pressure regulation"
+                ]
+            }
+        },
+        {
+            "id": "THYROID_METABOLIC_LINK",
+            "name": "Thyroid-Metabolic Disruption",
+            "description": "High TSH (hypothyroid) combined with high cholesterol suggests thyroid-driven dyslipidemia. Treating the thyroid may normalize lipids.",
+            "conditions": [
+                {
+                    "biomarker": "tsh",
+                    "status": "high"
+                },
+                {
+                    "biomarker": "total_cholesterol",
+                    "status": "high"
+                }
+            ],
+            "operator": "AND",
+            "score_modifier": -8,
+            "affected_cluster": "hormonal",
+            "priority": 2,
+            "clinical_significance": "Hypothyroidism causes secondary hyperlipidemia. Lipids may normalize with thyroid treatment alone, avoiding unnecessary statin therapy.",
+            "triggered_recommendations": {
+                "activity": [
+                    "Moderate exercise despite fatigue — helps thyroid function",
+                    "Morning exercise preferred for metabolism boost",
+                    "Avoid over-exercising which can worsen thyroid function"
+                ],
+                "nutrition": [
+                    "Iodine-rich foods: seaweed, fish, dairy",
+                    "Selenium-rich foods: Brazil nuts (2-3/day), tuna",
+                    "Zinc-rich foods: pumpkin seeds, chickpeas",
+                    "Avoid excess raw cruciferous vegetables (goitrogenic)"
+                ],
+                "supplementation": [
+                    "Selenium (consult provider for dosage)",
+                    "Zinc (consult provider for dosage)",
+                    "Vitamin D (often co-deficient with thyroid issues, consult provider)"
+                ],
+                "lifestyle": [
+                    "Regular thyroid monitoring every 6-8 weeks",
+                    "Stress management — cortisol disrupts thyroid",
+                    "Avoid environmental toxins (fluoride, bromide)",
+                    "Consistent sleep schedule"
+                ],
+                "alternate_healing": [
+                    "Ayurvedic: Kanchanar Guggul for thyroid support",
+                    "Ayurvedic: Ashwagandha for thyroid hormone balance",
+                    "Ayurvedic: Jalkumbhi (water hyacinth) for iodine",
+                    "Yoga: Sarvangasana (Shoulder stand) for thyroid stimulation",
+                    "Yoga: Matsyasana (Fish pose) — thyroid and parathyroid"
+                ]
+            }
+        },
+        {
+            "id": "INFLAMMATION_LIVER_PATTERN",
+            "name": "Inflammation-Liver Stress Pattern",
+            "description": "High hs-CRP + high SGPT/ALT indicates systemic inflammation with liver involvement. Could suggest NAFLD or hepatitis.",
+            "conditions": [
+                {
+                    "biomarker": "hs_crp",
+                    "status": "high"
+                },
+                {
+                    "biomarker": "sgpt_alt",
+                    "status": "high"
+                }
+            ],
+            "operator": "AND",
+            "score_modifier": -10,
+            "affected_cluster": "inflammation",
+            "priority": 2,
+            "clinical_significance": "Liver is both a source and target of inflammation. This pattern requires liver imaging and viral hepatitis panel.",
+            "triggered_recommendations": {
+                "activity": [
+                    "Moderate-intensity exercise (helps reduce liver fat)",
+                    "Walking 30 mins daily minimum",
+                    "Avoid strenuous exercise until liver enzymes normalize"
+                ],
+                "nutrition": [
+                    "Coffee (2-3 cups/day — hepatoprotective)",
+                    "Cruciferous vegetables for liver detox",
+                    "Turmeric (curcumin) as anti-inflammatory",
+                    "Avoid alcohol completely",
+                    "Avoid processed foods, excess sugar, and trans fats",
+                    "Green leafy vegetables for antioxidants"
+                ],
+                "supplementation": [
+                    "Milk thistle / Silymarin (consult provider for dosage)",
+                    "N-Acetyl Cysteine / NAC (consult provider)",
+                    "Curcumin / Turmeric extract (consult provider)"
+                ],
+                "lifestyle": [
+                    "Alcohol cessation or significant reduction",
+                    "Weight loss if overweight (target 0.5-1kg/week)",
+                    "Avoid unnecessary medications (especially NSAIDs, acetaminophen)",
+                    "Regular liver function monitoring"
+                ],
+                "alternate_healing": [
+                    "Ayurvedic: Kutki (Picrorhiza kurroa) for liver protection",
+                    "Ayurvedic: Bhumi Amla (Phyllanthus niruri) for liver health",
+                    "Ayurvedic: Kalmegh (Andrographis) for liver inflammation",
+                    "Yoga: Ardha Matsyendrasana (seated twist) for liver massage",
+                    "Yoga: Dhanurasana (Bow pose) for liver stimulation"
+                ]
+            }
+        },
+        {
+            "id": "MULTI_DEFICIENCY_PATTERN",
+            "name": "Multiple Nutritional Deficiency Pattern",
+            "description": "Low Vitamin D + Low Ferritin + Low B12 suggests global malabsorption or chronic dietary insufficiency.",
+            "conditions": [
+                {
+                    "biomarker": "vitamin_d",
+                    "status": "low"
+                },
+                {
+                    "biomarker": "ferritin",
+                    "status": "low"
+                },
+                {
+                    "biomarker": "vitamin_b12",
+                    "status": "low"
+                }
+            ],
+            "operator": "AND",
+            "score_modifier": -12,
+            "affected_cluster": "deficiencies",
+            "priority": 1,
+            "clinical_significance": "Triple deficiency pattern. Consider malabsorption syndromes (Celiac, Crohn's), chronic gastritis, or chronic dietary insufficiency. Screening for GI conditions recommended.",
+            "triggered_recommendations": {
+                "activity": [
+                    "Light exercise only — fatigue from multi-deficiency is real",
+                    "Gentle yoga or tai chi",
+                    "Outdoor walking for Vitamin D synthesis (15-30 mins)"
+                ],
+                "nutrition": [
+                    "Nutrient-dense whole foods diet",
+                    "Leafy greens, legumes, fortified cereals",
+                    "For non-veg: liver, shellfish, salmon, eggs",
+                    "For veg: fortified plant milks, nutritional yeast, sprouted grains",
+                    "Consider anti-inflammatory diet to support gut absorption"
+                ],
+                "supplementation": [
+                    "Multivitamin with iron, B12, and D3 (consult provider)",
+                    "Consider injectable B12 if oral absorption is poor",
+                    "Vitamin D3 (consult provider for dosage based on levels)",
+                    "Iron bisglycinate (gentler on stomach, consult provider)"
+                ],
+                "lifestyle": [
+                    "Daily sunlight exposure 15-30 minutes (for Vitamin D)",
+                    "Gut health focus: probiotics, fermented foods",
+                    "Screen for celiac disease and other malabsorption",
+                    "Regular monitoring every 6-8 weeks"
+                ],
+                "alternate_healing": [
+                    "Ayurvedic: Chyawanprash for overall nutritional support",
+                    "Ayurvedic: Triphala for gut absorption improvement",
+                    "Ayurvedic: Shatavari for nutrient assimilation",
+                    "Yoga: Pavanamuktasana (Wind-relieving) for digestive health",
+                    "Meditation: Yoga Nidra for deep restorative rest"
+                ]
+            }
+        },
+        {
+            "id": "DYSLIPIDEMIA_SIMPLE",
+            "name": "Mixed Dyslipidemia Pattern",
+            "description": "High LDL + High Triglycerides together indicate mixed dyslipidemia requiring both dietary and lifestyle intervention.",
+            "conditions": [
+                {
+                    "biomarker": "ldl",
+                    "status": "high"
+                },
+                {
+                    "biomarker": "triglycerides",
+                    "status": "high"
+                }
+            ],
+            "operator": "AND",
+            "score_modifier": -8,
+            "affected_cluster": "lipids",
+            "priority": 2,
+            "clinical_significance": "Mixed dyslipidemia accelerates atherosclerosis. Lifestyle modification is first-line therapy.",
+            "triggered_recommendations": {
+                "activity": [
+                    "Aerobic exercise 30 mins, 5 days/week",
+                    "Swimming or cycling preferred",
+                    "Consistent daily movement — avoid sedentary periods > 1 hour"
+                ],
+                "nutrition": [
+                    "Reduce saturated fat to < 7% of calories",
+                    "Increase omega-3 fatty acids",
+                    "Soluble fiber: 10-25g/day",
+                    "Limit alcohol and refined sugars",
+                    "Nuts: almonds, walnuts (handful/day)"
+                ],
+                "supplementation": [
+                    "Omega-3 (consult provider for dosage)",
+                    "Red yeast rice (consult provider — natural statin)",
+                    "Psyllium husk for soluble fiber (consult provider)"
+                ],
+                "lifestyle": [
+                    "Weight management — even 5% loss improves lipids",
+                    "No smoking",
+                    "Stress management",
+                    "Regular lipid panel monitoring every 3 months"
+                ],
+                "alternate_healing": [
+                    "Ayurvedic: Guggul (Commiphora mukul) for cholesterol reduction",
+                    "Ayurvedic: Arjuna bark tea for heart health",
+                    "Yoga: Paschimottanasana (seated forward bend) for digestion",
+                    "Yoga: Trikonasana (Triangle pose) for circulation"
+                ]
+            }
+        },
+        {
+            "id": "VIT_D_INFLAMMATION",
+            "name": "Vitamin D Deficiency with Inflammation",
+            "description": "Low Vitamin D + High hs-CRP. Vitamin D is a key immunomodulator; its deficiency amplifies inflammatory pathways.",
+            "conditions": [
+                {
+                    "biomarker": "vitamin_d",
+                    "status": "low"
+                },
+                {
+                    "biomarker": "hs_crp",
+                    "status": "high"
+                }
+            ],
+            "operator": "AND",
+            "score_modifier": -7,
+            "affected_cluster": "inflammation",
+            "priority": 2,
+            "clinical_significance": "Vitamin D deficiency potentiates chronic inflammation. Correcting D levels often reduces CRP independently.",
+            "triggered_recommendations": {
+                "activity": [
+                    "Outdoor exercise for sun exposure + physical activity",
+                    "Morning walks (before 10 AM) for optimal UV exposure",
+                    "Moderate intensity to avoid exercise-induced inflammation"
+                ],
+                "nutrition": [
+                    "Vitamin D rich foods: fatty fish, fortified milk, egg yolks",
+                    "Anti-inflammatory foods: berries, leafy greens, turmeric",
+                    "Mushrooms (sun-exposed) for plant-based vitamin D",
+                    "Avoid pro-inflammatory foods: processed meats, sugar"
+                ],
+                "supplementation": [
+                    "Vitamin D3 (consult provider for dosage based on blood levels)",
+                    "Curcumin with black pepper for anti-inflammatory effect (consult provider)",
+                    "Omega-3 for anti-inflammatory support (consult provider)"
+                ],
+                "lifestyle": [
+                    "15-30 mins daily sun exposure on arms and face",
+                    "Stress reduction: cortisol blocks vitamin D receptors",
+                    "Adequate sleep (melatonin supports D metabolism)",
+                    "Reduce environmental toxin exposure"
+                ],
+                "alternate_healing": [
+                    "Ayurvedic: Guduchi (Tinospora cordifolia) — immunomodulator",
+                    "Ayurvedic: Amalaki (Indian Gooseberry) for inflammation",
+                    "Yoga: Surya Namaskar (Sun Salutation) in morning sunlight",
+                    "Pranayama: Bhastrika for immune system stimulation"
+                ]
+            }
+        }
+    ],
+    "cluster_triggers": {
+        "blood_health": {
+            "description": "Blood Health / Anemia Cluster",
+            "primary_markers": [
+                "hemoglobin",
+                "rbc_count",
+                "ferritin"
+            ],
+            "supporting_markers": [
+                "vitamin_b12"
+            ],
+            "trigger_patterns": [
+                {
+                    "pattern": "Low Hb + Low Ferritin",
+                    "diagnosis": "Iron-Deficiency Anemia",
+                    "priority": 1
+                },
+                {
+                    "pattern": "Low Hb + Low B12",
+                    "diagnosis": "Megaloblastic Anemia",
+                    "priority": 1
+                },
+                {
+                    "pattern": "Low Hb + Normal Ferritin + Normal B12",
+                    "diagnosis": "Anemia of Chronic Disease — further workup needed",
+                    "priority": 2
+                },
+                {
+                    "pattern": "Low RBC + Low Hb",
+                    "diagnosis": "Anemia (type to be determined by MCV)",
+                    "priority": 1
+                }
+            ]
+        },
+        "metabolic": {
+            "description": "Metabolic / Diabetes Risk Cluster",
+            "primary_markers": [
+                "fasting_glucose",
+                "hba1c"
+            ],
+            "supporting_markers": [
+                "triglycerides",
+                "hdl"
+            ],
+            "trigger_patterns": [
+                {
+                    "pattern": "High Glucose + High HbA1c",
+                    "diagnosis": "Confirmed Prediabetes or Diabetes (per ADA criteria)",
+                    "priority": 1
+                },
+                {
+                    "pattern": "High Glucose + Normal HbA1c",
+                    "diagnosis": "Acute glucose elevation — repeat fasting test recommended",
+                    "priority": 2
+                },
+                {
+                    "pattern": "Normal Glucose + High HbA1c",
+                    "diagnosis": "Post-prandial hyperglycemia pattern — OGTT recommended",
+                    "priority": 2
+                },
+                {
+                    "pattern": "High Glucose + High TG + Low HDL",
+                    "diagnosis": "Metabolic Syndrome",
+                    "priority": 1
+                }
+            ]
+        },
+        "lipids": {
+            "description": "Cardiovascular / Lipid Cluster",
+            "primary_markers": [
+                "total_cholesterol",
+                "ldl",
+                "hdl",
+                "triglycerides"
+            ],
+            "supporting_markers": [
+                "hs_crp"
+            ],
+            "trigger_patterns": [
+                {
+                    "pattern": "High LDL + Low HDL",
+                    "diagnosis": "Atherogenic dyslipidemia — 10yr CVD risk evaluation needed",
+                    "priority": 1
+                },
+                {
+                    "pattern": "High LDL + High TG",
+                    "diagnosis": "Mixed dyslipidemia",
+                    "priority": 2
+                },
+                {
+                    "pattern": "High TC + High LDL + Normal HDL",
+                    "diagnosis": "Isolated hypercholesterolemia",
+                    "priority": 2
+                },
+                {
+                    "pattern": "High LDL + Low HDL + High CRP",
+                    "diagnosis": "High cardiovascular risk — aggressive intervention needed",
+                    "priority": 1
+                }
+            ]
+        },
+        "deficiencies": {
+            "description": "Nutritional Deficiency Cluster",
+            "primary_markers": [
+                "ferritin",
+                "vitamin_b12",
+                "vitamin_d"
+            ],
+            "supporting_markers": [
+                "hemoglobin"
+            ],
+            "trigger_patterns": [
+                {
+                    "pattern": "Low Ferritin + Low B12 + Low D",
+                    "diagnosis": "Global malabsorption — GI screening recommended",
+                    "priority": 1
+                },
+                {
+                    "pattern": "Low Ferritin + Low Hb",
+                    "diagnosis": "Iron-deficiency anemia",
+                    "priority": 1
+                },
+                {
+                    "pattern": "Low D + High CRP",
+                    "diagnosis": "Vitamin D deficiency potentiating inflammation",
+                    "priority": 2
+                },
+                {
+                    "pattern": "Low B12 + Low Hb",
+                    "diagnosis": "B12-deficiency anemia",
+                    "priority": 1
+                }
+            ]
+        },
+        "inflammation": {
+            "description": "Inflammation Cluster",
+            "primary_markers": [
+                "hs_crp"
+            ],
+            "supporting_markers": [
+                "sgpt_alt",
+                "vitamin_d",
+                "fasting_glucose"
+            ],
+            "trigger_patterns": [
+                {
+                    "pattern": "High CRP + High ALT",
+                    "diagnosis": "Systemic inflammation with hepatic involvement",
+                    "priority": 1
+                },
+                {
+                    "pattern": "High CRP + Low D",
+                    "diagnosis": "Inflammation amplified by vitamin D deficiency",
+                    "priority": 2
+                },
+                {
+                    "pattern": "High CRP + High Glucose",
+                    "diagnosis": "Metabolic inflammation — insulin resistance linked",
+                    "priority": 2
+                },
+                {
+                    "pattern": "High CRP alone",
+                    "diagnosis": "Non-specific inflammation — infection, autoimmune, or CVD risk",
+                    "priority": 3
+                }
+            ]
+        },
+        "hormonal": {
+            "description": "Hormonal / Thyroid Cluster",
+            "primary_markers": [
+                "tsh"
+            ],
+            "supporting_markers": [
+                "total_cholesterol",
+                "triglycerides",
+                "hdl"
+            ],
+            "trigger_patterns": [
+                {
+                    "pattern": "High TSH + High TC",
+                    "diagnosis": "Thyroid-driven hyperlipidemia",
+                    "priority": 1
+                },
+                {
+                    "pattern": "High TSH + High TG",
+                    "diagnosis": "Hypothyroid metabolic effects",
+                    "priority": 2
+                },
+                {
+                    "pattern": "High TSH alone",
+                    "diagnosis": "Subclinical hypothyroidism — monitor and evaluate",
+                    "priority": 3
+                }
+            ]
+        },
+        "liver": {
+            "description": "Liver Function Cluster",
+            "primary_markers": [
+                "sgpt_alt"
+            ],
+            "supporting_markers": [
+                "hs_crp",
+                "triglycerides",
+                "fasting_glucose"
+            ],
+            "trigger_patterns": [
+                {
+                    "pattern": "High ALT + High TG + High Glucose",
+                    "diagnosis": "Non-alcoholic fatty liver disease (NAFLD) likely",
+                    "priority": 1
+                },
+                {
+                    "pattern": "High ALT + High CRP",
+                    "diagnosis": "Hepatic inflammation — viral/autoimmune workup needed",
+                    "priority": 1
+                },
+                {
+                    "pattern": "High ALT alone",
+                    "diagnosis": "Isolated liver enzyme elevation — monitor and lifestyle modification",
+                    "priority": 3
+                }
+            ]
+        }
+    },
+    "priority_rules": {
+        "description": "Rules for AI to determine priority ordering of findings and recommendations",
+        "priority_levels": [
+            {
+                "level": 1,
+                "name": "Critical / Immediate",
+                "criteria": "Panic/critical values, confirmed multi-marker disease patterns, metabolic syndrome",
+                "action_timeframe": "Seek medical attention within 24-48 hours",
+                "modifier_weight": 1.5
+            },
+            {
+                "level": 2,
+                "name": "High Priority",
+                "criteria": "Two-marker interaction patterns, significant deviations (>30%), confirmed deficiency patterns",
+                "action_timeframe": "Address within 1-2 weeks; schedule provider visit",
+                "modifier_weight": 1.2
+            },
+            {
+                "level": 3,
+                "name": "Moderate",
+                "criteria": "Single marker abnormalities, mild deviations, isolated findings",
+                "action_timeframe": "Address within 1-3 months through lifestyle changes",
+                "modifier_weight": 1.0
+            },
+            {
+                "level": 4,
+                "name": "Maintenance / Prevention",
+                "criteria": "Borderline values, preventive optimization, values at edges of normal",
+                "action_timeframe": "Incorporate into long-term health plan",
+                "modifier_weight": 0.8
+            }
+        ],
+        "ordering_rules": [
+            "Always place life-threatening/critical findings first",
+            "Multi-marker interaction findings take priority over single-marker findings",
+            "Within same priority level, order by deviation percentage (highest first)",
+            "Cluster-confirmed diagnoses rank higher than isolated marker abnormalities",
+            "Treatable conditions rank higher than conditions requiring only monitoring"
+        ]
+    }
+}

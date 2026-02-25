@@ -135,13 +135,28 @@ class BiomarkerAnalyticsEngine:
         Category scores follow same convention:
         - 100 = all normal in this category
         - 0 = all severely abnormal
+        
+        Interaction modifiers are applied when multi-marker patterns are detected.
         """
         if not classifications:
-            return {"score": 0, "level": "unknown", "summary": "No data", "category_scores": {}}
+            return {"score": 0, "level": "unknown", "summary": "No data", "category_scores": {}, "triggered_interactions": []}
 
         total = len(classifications)
         abnormal = [c for c in classifications if c["status"] != "normal"]
         high_deviation = [c for c in abnormal if c["deviation_percent"] > 30]
+
+        # --- Detect interaction modifiers ---
+        triggered_interactions = self.kb.detect_interactions(classifications)
+        # Build a map: cluster -> total penalty from interactions
+        interaction_penalties_by_cluster = {}
+        total_interaction_penalty = 0
+        for ix in triggered_interactions:
+            cluster = ix.get("affected_cluster", "")
+            penalty = abs(ix.get("score_modifier", 0))
+            interaction_penalties_by_cluster[cluster] = (
+                interaction_penalties_by_cluster.get(cluster, 0) + penalty
+            )
+            total_interaction_penalty += penalty
 
         # --- Category-level breakdown ---
         category_scores = {}
@@ -166,6 +181,10 @@ class BiomarkerAnalyticsEngine:
             risk_raw = (ratio * 60 + severity_factor * 40) * cat_info["weight"]
             risk_score = min(100, round(risk_raw))
 
+            # Apply interaction modifier penalties for this cluster
+            cluster_interaction_penalty = interaction_penalties_by_cluster.get(cat_key, 0)
+            risk_score = min(100, risk_score + cluster_interaction_penalty)
+
             # INVERT: Health score = 100 - risk (higher = healthier)
             health_score = max(0, 100 - risk_score)
 
@@ -185,6 +204,13 @@ class BiomarkerAnalyticsEngine:
             else:
                 status_label = "High Risk"
 
+            # Note interaction modifiers that affected this cluster
+            cluster_interactions = [
+                {"name": ix["name"], "modifier": ix["score_modifier"]}
+                for ix in triggered_interactions
+                if ix.get("affected_cluster") == cat_key
+            ]
+
             category_scores[cat_key] = {
                 "label": cat_info["label"],
                 "icon": cat_info["icon"],
@@ -196,6 +222,7 @@ class BiomarkerAnalyticsEngine:
                     {"name": c["biomarker"], "status": c["status"], "deviation": c["deviation_percent"]}
                     for c in cat_markers
                 ],
+                "interaction_modifiers": cluster_interactions,
             }
 
         # Overall health score (weighted average of inverted category scores)
@@ -227,6 +254,19 @@ class BiomarkerAnalyticsEngine:
             "abnormal_markers": len(abnormal),
             "high_deviation_markers": len(high_deviation),
             "category_scores": category_scores,
+            "triggered_interactions": [
+                {
+                    "id": ix.get("id", ""),
+                    "name": ix["name"],
+                    "description": ix["description"],
+                    "score_modifier": ix["score_modifier"],
+                    "affected_cluster": ix.get("affected_cluster", ""),
+                    "priority": ix.get("priority", 3),
+                    "clinical_significance": ix.get("clinical_significance", ""),
+                    "triggered_recommendations": ix.get("triggered_recommendations", {}),
+                }
+                for ix in triggered_interactions
+            ],
         }
 
     def _gather_kb_context(self, classifications: list[dict]) -> str:
@@ -286,8 +326,8 @@ class BiomarkerAnalyticsEngine:
         """
         Full analysis pipeline:
         1. Classify all biomarkers
-        2. Calculate health score with category breakdown
-        3. Gather knowledge base context
+        2. Calculate health score with category breakdown + interaction modifiers
+        3. Gather knowledge base context + interaction context
         4. Gather web search context + sources
         5. Generate LLM-powered analysis with Groq
         """
@@ -296,12 +336,17 @@ class BiomarkerAnalyticsEngine:
         height = user_profile.get("height", "")
         weight = user_profile.get("weight", "")
 
-        # Step 1 & 2: Classify and score
+        # Step 1 & 2: Classify and score (interaction modifiers applied inside)
         classifications = self.classify_all(biomarkers, gender)
         risk_score = self._get_risk_score(classifications)
 
-        # Step 3 & 4: Gather context
+        # Step 3: Gather context (KB + interaction modifiers)
         kb_context = self._gather_kb_context(classifications)
+        interaction_context = self.kb.get_interaction_context(classifications)
+        if interaction_context:
+            kb_context = kb_context + "\n\n" + interaction_context
+
+        # Step 4: Web search context
         web_context, web_sources = self._gather_web_context(classifications)
 
         # Step 5: LLM Analysis
@@ -431,18 +476,20 @@ Respond ONLY with valid JSON in this EXACT structure:
       "rationale": "Why this is prioritized at this level"
     }
   ],
+  "activity_recommendations": [
+    {
+      "recommendation": "Specific exercise or physical activity advice",
+      "intensity": "light/moderate/vigorous",
+      "frequency": "How often (e.g., '30 mins daily', '3x/week')",
+      "reason": "Why this activity is recommended, linking to biomarker findings",
+      "precaution": "Any safety considerations based on current health status"
+    }
+  ],
   "dietary_recommendations": [
     {
       "category": "Foods to Include/Avoid",
       "items": ["item1", "item2"],
       "reason": "Why, linking to specific biomarker findings"
-    }
-  ],
-  "lifestyle_recommendations": [
-    {
-      "recommendation": "Specific actionable advice",
-      "priority": "high/medium/low",
-      "expected_impact": "What improvement to expect and in what timeframe"
     }
   ],
   "supplement_suggestions": [
@@ -452,6 +499,22 @@ Respond ONLY with valid JSON in this EXACT structure:
       "reason": "Why suggested, referencing the specific abnormal value",
       "duration": "How long to take it before retest",
       "caution": "Any warnings or interactions"
+    }
+  ],
+  "lifestyle_recommendations": [
+    {
+      "recommendation": "Specific actionable advice",
+      "priority": "high/medium/low",
+      "expected_impact": "What improvement to expect and in what timeframe"
+    }
+  ],
+  "alternate_healing_recommendations": [
+    {
+      "system": "Ayurveda/Yoga/Traditional Chinese Medicine/Naturopathy",
+      "recommendation": "Specific practice or remedy name",
+      "description": "Brief explanation of how this practice helps",
+      "target_condition": "Which biomarker issue this addresses",
+      "caution": "Important safety considerations or contraindications"
     }
   ],
   "follow_up_tests": [
@@ -465,6 +528,7 @@ Respond ONLY with valid JSON in this EXACT structure:
   "score_explanation": {
     "health_score": "N/100 (where higher = healthier)",
     "interpretation": "What this score means. E.g., 'A score of 8/100 indicates significant health concerns across multiple systems requiring medical attention. The score is primarily driven down by...'",
+    "interaction_modifiers_applied": ["List any multi-marker interaction patterns detected and their score impact"],
     "top_contributors": [
       {"category": "category name", "impact": "-N points", "reason": "why this category reduces the score"}
     ]
@@ -509,9 +573,12 @@ IMPORTANT INSTRUCTIONS:
 3. For supplement_suggestions and priority_actions: DO NOT suggest direct medicine quantities or dosages. Tell the user to consult their healthcare provider for appropriate dosage. Also, tailor dietary_recommendations strictly according to the Patient Profile's Diet Preference (e.g., if veg, give vegetarian food sources only; if non-veg, include meat/fish options).
 4. For thyroid: if TSH is mildly elevated with normal T4/T3, recommend "monitoring and evaluation" not "starting replacement therapy."
 5. In priority_actions, order from most urgent to least. Number them 1, 2, 3, etc.
-6. In score_explanation, explain what the health score of {health_score}/100 means and which categories contribute most to reducing it.
-7. Cross-reference related markers (e.g., low hemoglobin + low ferritin = iron-deficiency anemia pattern).
-8. In the summary, mention the specific systems affected and the health score."""
+6. In score_explanation, explain what the health score of {health_score}/100 means and which categories contribute most to reducing it. If interaction modifiers were detected, mention them.
+7. Cross-reference related markers (e.g., low hemoglobin + low ferritin = iron-deficiency anemia pattern). The knowledge base may already provide detected patterns — use them.
+8. In the summary, mention the specific systems affected and the health score.
+9. For activity_recommendations: Suggest specific exercises appropriate for the patient's conditions. Consider limitations from deficiencies (e.g., avoid high-intensity if anemic).
+10. For alternate_healing_recommendations: Include Ayurvedic herbs/remedies, Yoga asanas/pranayama, and other traditional healing practices. Each must link to a specific biomarker finding. Include safety cautions.
+11. If the knowledge base provides INTERACTION MODIFIERS or CLUSTER TRIGGERS, prioritize those findings and incorporate their recommendations into your response."""
 
 
         if not self.groq_client:

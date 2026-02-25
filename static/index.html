@@ -293,8 +293,12 @@
 
                         <!-- Score Breakdown -->
                         <div class="card glass-card score-breakdown-card">
-                            <h3><i class="fa-solid fa-chart-bar"></i> Score Breakdown</h3>
+                            <h3><i class="fa-solid fa-chart-pie"></i> Score Breakdown</h3>
                             <p id="score-interpretation" class="score-interpretation-text">Loading...</p>
+                            <div class="score-chart-wrapper">
+                                <canvas id="score-donut-chart" width="280" height="280"></canvas>
+                                <div class="score-chart-legend" id="score-donut-legend"></div>
+                            </div>
                             <div id="score-breakdown" class="score-breakdown-grid"></div>
                             <div id="score-top-contributors" class="top-contributors"></div>
                         </div>
@@ -305,6 +309,16 @@
                             <p class="info-text"><i class="fa-solid fa-circle-info"></i> Ordered from most urgent to
                                 least. Address items in this order for maximum health impact.</p>
                             <div id="priority-actions-list" class="priority-actions"></div>
+                        </div>
+
+                        <!-- Interaction Modifiers Detected -->
+                        <div id="interaction-modifiers-section"
+                            class="card glass-card interaction-modifiers-card hidden">
+                            <h3><i class="fa-solid fa-link"></i> Biomarker Interaction Patterns Detected</h3>
+                            <p class="info-text"><i class="fa-solid fa-circle-info"></i> These multi-marker patterns
+                                were detected from your results. Each pattern applies additional score adjustments for
+                                clinical accuracy.</p>
+                            <div id="interaction-modifiers-list" class="interaction-modifiers-list"></div>
                         </div>
 
                         <div class="results-grid">
@@ -319,17 +333,36 @@
                                 </div>
                             </div>
                             <div class="col-right">
-                                <div class="card glass-card recommendations">
-                                    <h3><i class="fa-solid fa-apple-whole"></i> Nutrition Plan</h3>
-                                    <ul id="nutrition-list" class="styled-list"></ul>
-                                </div>
-                                <div class="card glass-card recommendations">
-                                    <h3><i class="fa-solid fa-person-running"></i> Lifestyle Changes</h3>
-                                    <ul id="lifestyle-list" class="styled-list"></ul>
-                                </div>
-                                <div class="card glass-card recommendations">
-                                    <h3><i class="fa-solid fa-pills"></i> Supplementation</h3>
-                                    <ul id="supplements-list" class="styled-list"></ul>
+                                <!-- ═══ ALL RECOMMENDATIONS (Tabbed) ═══ -->
+                                <div class="card glass-card recommendations-panel">
+                                    <h3><i class="fa-solid fa-clipboard-list"></i> All Recommendations</h3>
+                                    <div class="rec-tabs">
+                                        <button class="rec-tab active" data-rec-target="rec-activity"><i
+                                                class="fa-solid fa-person-running"></i> Activity</button>
+                                        <button class="rec-tab" data-rec-target="rec-nutrition"><i
+                                                class="fa-solid fa-apple-whole"></i> Nutrition</button>
+                                        <button class="rec-tab" data-rec-target="rec-supplements"><i
+                                                class="fa-solid fa-pills"></i> Supplements</button>
+                                        <button class="rec-tab" data-rec-target="rec-lifestyle"><i
+                                                class="fa-solid fa-leaf"></i> Lifestyle</button>
+                                        <button class="rec-tab" data-rec-target="rec-alternate"><i
+                                                class="fa-solid fa-spa"></i> Alternate Healing</button>
+                                    </div>
+                                    <div class="rec-tab-content active" id="rec-activity">
+                                        <div id="activity-list" class="activity-recommendations"></div>
+                                    </div>
+                                    <div class="rec-tab-content" id="rec-nutrition">
+                                        <ul id="nutrition-list" class="styled-list"></ul>
+                                    </div>
+                                    <div class="rec-tab-content" id="rec-supplements">
+                                        <ul id="supplements-list" class="styled-list"></ul>
+                                    </div>
+                                    <div class="rec-tab-content" id="rec-lifestyle">
+                                        <ul id="lifestyle-list" class="styled-list"></ul>
+                                    </div>
+                                    <div class="rec-tab-content" id="rec-alternate">
+                                        <div id="alternate-healing-list" class="alternate-healing-list"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -574,8 +607,12 @@
 
                             <!-- Score Breakdown (Upload) -->
                             <div class="card glass-card score-breakdown-card">
-                                <h3><i class="fa-solid fa-chart-bar"></i> Score Breakdown</h3>
+                                <h3><i class="fa-solid fa-chart-pie"></i> Score Breakdown</h3>
                                 <p id="upload-score-interpretation" class="score-interpretation-text">Loading...</p>
+                                <div class="score-chart-wrapper">
+                                    <canvas id="upload-score-donut-chart" width="280" height="280"></canvas>
+                                    <div class="score-chart-legend" id="upload-score-donut-legend"></div>
+                                </div>
                                 <div id="upload-score-breakdown" class="score-breakdown-grid"></div>
                                 <div id="upload-score-top-contributors" class="top-contributors"></div>
                             </div>
@@ -587,6 +624,15 @@
                                     least.</p>
                                 <div id="upload-priority-actions" class="priority-actions"></div>
                             </div>
+                            <!-- Interaction Modifiers (Upload) -->
+                            <div id="upload-interaction-section"
+                                class="card glass-card interaction-modifiers-card hidden">
+                                <h3><i class="fa-solid fa-link"></i> Biomarker Interaction Patterns Detected</h3>
+                                <p class="info-text"><i class="fa-solid fa-circle-info"></i> Multi-marker patterns
+                                    detected with score adjustments.</p>
+                                <div id="upload-interaction-list" class="interaction-modifiers-list"></div>
+                            </div>
+
                             <div class="results-grid">
                                 <div class="col-left">
                                     <div class="card glass-card">
@@ -599,17 +645,36 @@
                                     </div>
                                 </div>
                                 <div class="col-right">
-                                    <div class="card glass-card recommendations">
-                                        <h3><i class="fa-solid fa-apple-whole"></i> Nutrition Plan</h3>
-                                        <ul id="upload-nutrition" class="styled-list"></ul>
-                                    </div>
-                                    <div class="card glass-card recommendations">
-                                        <h3><i class="fa-solid fa-person-running"></i> Lifestyle Changes</h3>
-                                        <ul id="upload-lifestyle" class="styled-list"></ul>
-                                    </div>
-                                    <div class="card glass-card recommendations">
-                                        <h3><i class="fa-solid fa-pills"></i> Supplementation</h3>
-                                        <ul id="upload-supplements" class="styled-list"></ul>
+                                    <!-- ═══ ALL RECOMMENDATIONS (Upload - Tabbed) ═══ -->
+                                    <div class="card glass-card recommendations-panel">
+                                        <h3><i class="fa-solid fa-clipboard-list"></i> All Recommendations</h3>
+                                        <div class="rec-tabs">
+                                            <button class="rec-tab active" data-rec-target="upload-rec-activity"><i
+                                                    class="fa-solid fa-person-running"></i> Activity</button>
+                                            <button class="rec-tab" data-rec-target="upload-rec-nutrition"><i
+                                                    class="fa-solid fa-apple-whole"></i> Nutrition</button>
+                                            <button class="rec-tab" data-rec-target="upload-rec-supplements"><i
+                                                    class="fa-solid fa-pills"></i> Supplements</button>
+                                            <button class="rec-tab" data-rec-target="upload-rec-lifestyle"><i
+                                                    class="fa-solid fa-leaf"></i> Lifestyle</button>
+                                            <button class="rec-tab" data-rec-target="upload-rec-alternate"><i
+                                                    class="fa-solid fa-spa"></i> Alternate Healing</button>
+                                        </div>
+                                        <div class="rec-tab-content active" id="upload-rec-activity">
+                                            <div id="upload-activity" class="activity-recommendations"></div>
+                                        </div>
+                                        <div class="rec-tab-content" id="upload-rec-nutrition">
+                                            <ul id="upload-nutrition" class="styled-list"></ul>
+                                        </div>
+                                        <div class="rec-tab-content" id="upload-rec-supplements">
+                                            <ul id="upload-supplements" class="styled-list"></ul>
+                                        </div>
+                                        <div class="rec-tab-content" id="upload-rec-lifestyle">
+                                            <ul id="upload-lifestyle" class="styled-list"></ul>
+                                        </div>
+                                        <div class="rec-tab-content" id="upload-rec-alternate">
+                                            <div id="upload-alternate-healing" class="alternate-healing-list"></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
