@@ -303,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
         );
 
         // Score breakdown, explanation & priority actions
-        renderScoreBreakdown(score.category_scores, 'score-breakdown');
+        renderScoreBreakdown(score.category_scores, 'score-breakdown', healthScore);
         renderScoreExplanation(analysis.score_explanation, 'score-interpretation', 'score-top-contributors');
         renderPriorityActions(analysis.priority_actions, 'priority-actions-list');
 
@@ -390,7 +390,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ─── Score Breakdown (Donut Chart + Category Bars) ─────────
     // health_score: 100 = healthy, 0 = critical
-    function renderScoreBreakdown(categoryScores, containerId) {
+    function renderScoreBreakdown(categoryScores, containerId, overallHealthScore) {
         const el = document.getElementById(containerId);
         el.innerHTML = '';
         if (!categoryScores || Object.keys(categoryScores).length === 0) {
@@ -432,7 +432,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         });
 
-        drawDonutChart(canvasId, legendId, segments);
+        drawDonutChart(canvasId, legendId, segments, overallHealthScore);
 
         // ─── Detail Bars ───
         sorted.forEach(([catKey, cs]) => {
@@ -473,7 +473,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ─── Donut Chart Drawing ────────────────────────
-    function drawDonutChart(canvasId, legendId, segments) {
+    function drawDonutChart(canvasId, legendId, segments, overallScore) {
         const canvas = document.getElementById(canvasId);
         const legendEl = document.getElementById(legendId);
         if (!canvas || !legendEl) return;
@@ -551,9 +551,8 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.lineWidth = 1;
             ctx.stroke();
 
-            // Center text — overall average health score
-            const avgHealth = Math.round(segments.reduce((sum, s) => sum + s.healthScore * s.value, 0) / totalValue);
-            const displayScore = Math.round(avgHealth * eased);
+            // Center text — use the ACTUAL health score from the engine
+            const displayScore = Math.round((overallScore || 0) * eased);
 
             ctx.fillStyle = displayScore >= 70 ? '#10b981' : displayScore >= 40 ? '#f59e0b' : '#ef4444';
             ctx.font = `bold ${32}px 'Outfit', sans-serif`;
@@ -563,7 +562,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
             ctx.font = `500 ${11}px 'Outfit', sans-serif`;
-            ctx.fillText('AVG HEALTH', centerX, centerY + 16);
+            ctx.fillText('HEALTH SCORE', centerX, centerY + 16);
 
             if (progress < 1) {
                 requestAnimationFrame(animateChart);
@@ -1324,7 +1323,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'upload-critical-alerts-list'
         );
 
-        renderScoreBreakdown(score.category_scores, 'upload-score-breakdown');
+        renderScoreBreakdown(score.category_scores, 'upload-score-breakdown', healthScore);
         renderScoreExplanation(analysis.score_explanation, 'upload-score-interpretation', 'upload-score-top-contributors');
         renderPriorityActions(analysis.priority_actions, 'upload-priority-actions');
 
